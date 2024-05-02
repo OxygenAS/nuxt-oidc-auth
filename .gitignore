@@ -13,8 +13,8 @@ node_modules
 **/.yarn/cache
 **/.yarn/*state*
 
-# Generated dirs
-dist
+# # Generated dirs 
+client/dist
 
 # Nuxt
 .nuxt
