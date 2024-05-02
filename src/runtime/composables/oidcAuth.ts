@@ -1,7 +1,7 @@
-import { useState, computed, useRequestFetch, navigateTo } from '#imports'
+import { useState, computed, useCookie, useRequestFetch, navigateTo, useRoute } from '#imports'
 import type { Ref, ComputedRef } from '#imports'
 import type { ProviderKeys } from '../types/oidc'
-import type { UserSession } from '../types/session'
+import type { UserSession, ReturnPath } from '../types/session'
 
 const useSessionState = () => useState<UserSession>('nuxt-oidc-auth-session', undefined)
 
@@ -26,11 +26,22 @@ export const useOidcAuth = () => {
   }
 
   async function login(provider?: ProviderKeys | 'dev') {
+    const cookie = useCookie('login-return-path') as Ref<ReturnPath>
+    const route = useRoute()
+    cookie.value = { path: route.path, query: route.params }
+
     await navigateTo(`/auth${provider ? '/' + provider : ''}/login`, { external: true, redirectCode: 302 })
   }
 
   async function logout(provider?: ProviderKeys | 'dev') {
-    await navigateTo(`/auth${provider ? '/' + provider : ''}/logout`, { external: true })
+    const route = useRoute()
+
+    await navigateTo(
+      `/auth${provider ? '/' + provider : ''}/logout?returnPath=${route.path}`,
+      {
+        external: true,
+      }
+    )
   }
 
   /**

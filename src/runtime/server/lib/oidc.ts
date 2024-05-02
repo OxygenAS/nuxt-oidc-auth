@@ -273,7 +273,7 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     if (config.logoutUrl) {
       return sendRedirect(
         event,
-        withQuery(config.logoutUrl, { ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}` }, }),
+        withQuery(config.logoutUrl, { ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}${getRequestURL(event).searchParams.get('returnPath') ? `/${getRequestURL(event).searchParams.get('returnPath')}` : '' }` } }),
         200
       )
     }

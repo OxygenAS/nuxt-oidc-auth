@@ -1,12 +1,12 @@
 {
   "name": "nuxt-oidc-auth",
   "private": false,
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "OIDC authentication module for Nuxt SSR",
   "repository": "itpropro/nuxt-oidc-auth",
   "homepage": "https://github.com/itpropro/nuxt-oidc-auth#readme",
   "license": "MIT",
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@9.0.6",
   "type": "module",
   "exports": {
     ".": {
