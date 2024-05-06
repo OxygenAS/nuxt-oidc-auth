@@ -15,6 +15,7 @@ node_modules
 
 # # Generated dirs 
 client/dist
+# dist
 
 # Nuxt
 .nuxt

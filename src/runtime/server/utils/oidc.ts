@@ -40,7 +40,6 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
     ...(config.scopeInTokenRequest && config.scope) && { scope: config.scope.join(' ') },
     ...(config.authenticationScheme === 'body') && { client_secret: normalizeURL(config.clientSecret) }
   }
-
   // Make refresh token request
   let tokenResponse: TokenRespose
   try {

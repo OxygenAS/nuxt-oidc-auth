@@ -4,8 +4,8 @@ import { ofetch } from 'ofetch'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
 import { validateConfig } from '../utils/config'
-import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, parseJwtToken, encryptToken, validateToken, genBase64FromString } from '../utils/security'
-import { getUserSessionId, clearUserSession } from '../utils/session'
+import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from '../utils/security'
+import { getUserSessionId, clearUserSession, getUserSession } from '../utils/session'
 import { configMerger, convertObjectToSnakeCase, convertTokenRequestToType, oidcErrorHandler, useOidcLogger } from '../utils/oidc'
 import { SignJWT } from 'jose'
 import * as providerPresets from '../../providers'
@@ -101,7 +101,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       const url = getRequestURL(event)
       sendRedirect(event, `${url.origin}/auth/${provider}/login`, 200)
     }
-
     // Verify id_token, if available (hybrid flow)
     if (id_token) {
       const parsedIdToken = parseJwtToken(id_token)
@@ -176,7 +175,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     // Initialize tokens object
     let tokens: Tokens
-
     // Validate tokens only if audience is matched
     const accessToken = parseJwtToken(tokenResponse.access_token, !!config.skipAccessTokenParsing)
     if ([config.audience, config.clientId].some((audience) => accessToken.aud?.includes(audience as string)) && (config.validateAccessToken || config.validateIdToken)) {
@@ -237,6 +235,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     if (config.exposeAccessToken)
       user.accessToken = tokenResponse.access_token
 
+
     if (config.exposeIdToken)
       user.idToken = tokenResponse.id_token
 
@@ -246,7 +245,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         exp: accessToken.exp as number,
         iat: accessToken.iat as number,
         accessToken: await encryptToken(tokenResponse.access_token, tokenKey),
-        refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey)
+        refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey),
+        ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) },
       }
       const userSessionId = await getUserSessionId(event)
       await useStorage('oidc').setItem<PersistentSession>(userSessionId, persistentSession)
@@ -254,7 +254,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     await session.clear()
     deleteCookie(event, 'oidc')
-
     return onSuccess(event, {
       user
     })
@@ -266,14 +265,25 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     // TODO: Is this the best way to get the current provider?
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
+    let idToken
+    if (config.logoutIncludeIdToken) {
+      const userSessionId = await getUserSessionId(event)
+      const persistentSession = await useStorage('oidc').getItem<PersistentSession>(userSessionId) as PersistentSession | null
+      const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
+      idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null
+    }
 
     // Clear session
     await clearUserSession(event)
-
+    // logoutIdTokenParameterName: 'id_token_hint',
+    // logoutIncludeIdToken: true,
     if (config.logoutUrl) {
       return sendRedirect(
         event,
-        withQuery(config.logoutUrl, { ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}${getRequestURL(event).searchParams.get('returnPath') ? `/${getRequestURL(event).searchParams.get('returnPath')}` : '' }` } }),
+        withQuery(config.logoutUrl, {
+          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}` },
+          ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken }
+        }),
         200
       )
     }

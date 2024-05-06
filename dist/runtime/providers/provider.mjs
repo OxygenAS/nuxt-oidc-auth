@@ -14,6 +14,8 @@ export function defineOidcProvider(config = {}) {
     tokenUrl: "",
     responseType: "code",
     authenticationScheme: "header",
+    logoutIdTokenParameterName: "id_token_hint",
+    logoutIncludeIdToken: false,
     grantType: "authorization_code",
     pkce: false,
     state: true,

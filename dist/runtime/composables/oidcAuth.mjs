@@ -25,9 +25,8 @@ export const useOidcAuth = () => {
     await navigateTo(`/auth${provider ? "/" + provider : ""}/login`, { external: true, redirectCode: 302 });
   }
   async function logout(provider) {
-    const route = useRoute();
     await navigateTo(
-      `/auth${provider ? "/" + provider : ""}/logout?returnPath=${route.path}`,
+      `/auth${provider ? "/" + provider : ""}/logout`,
       {
         external: true
       }

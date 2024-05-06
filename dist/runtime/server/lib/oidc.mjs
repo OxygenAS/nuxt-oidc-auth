@@ -3,7 +3,7 @@ import { withQuery, parseURL, normalizeURL } from "ufo";
 import { ofetch } from "ofetch";
 import { useRuntimeConfig, useStorage } from "#imports";
 import { validateConfig } from "../utils/config.mjs";
-import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, parseJwtToken, encryptToken, validateToken, genBase64FromString } from "../utils/security.mjs";
+import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from "../utils/security.mjs";
 import { getUserSessionId, clearUserSession } from "../utils/session.mjs";
 import { configMerger, convertObjectToSnakeCase, convertTokenRequestToType, oidcErrorHandler, useOidcLogger } from "../utils/oidc.mjs";
 import { SignJWT } from "jose";
@@ -192,7 +192,8 @@ export function callbackEventHandler({ onSuccess, onError }) {
         exp: accessToken.exp,
         iat: accessToken.iat,
         accessToken: await encryptToken(tokenResponse.access_token, tokenKey),
-        refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey)
+        refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey),
+        ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) }
       };
       const userSessionId = await getUserSessionId(event);
       await useStorage("oidc").setItem(userSessionId, persistentSession);
@@ -208,11 +209,21 @@ export function logoutEventHandler({ onSuccess }) {
   return eventHandler(async (event) => {
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
+    let idToken;
+    if (config.logoutIncludeIdToken) {
+      const userSessionId = await getUserSessionId(event);
+      const persistentSession = await useStorage("oidc").getItem(userSessionId);
+      const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+      idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null;
+    }
     await clearUserSession(event);
     if (config.logoutUrl) {
       return sendRedirect(
         event,
-        withQuery(config.logoutUrl, { ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}${getRequestURL(event).searchParams.get("returnPath") ? `/${getRequestURL(event).searchParams.get("returnPath")}` : ""}` } }),
+        withQuery(config.logoutUrl, {
+          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}` },
+          ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken }
+        }),
         200
       );
     }

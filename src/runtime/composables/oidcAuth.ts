@@ -8,6 +8,7 @@ const useSessionState = () => useState<UserSession>('nuxt-oidc-auth-session', un
 export const useOidcAuth = () => {
   const sessionState: Ref<UserSession> = useSessionState()
   const user: ComputedRef<UserSession> = computed(() => sessionState.value || undefined)
+  
   const loggedIn: ComputedRef<boolean> = computed<boolean>(() => {
     return Boolean(sessionState.value)
   })
@@ -29,15 +30,12 @@ export const useOidcAuth = () => {
     const cookie = useCookie('login-return-path') as Ref<ReturnPath>
     const route = useRoute()
     cookie.value = { path: route.path, query: route.params }
-
     await navigateTo(`/auth${provider ? '/' + provider : ''}/login`, { external: true, redirectCode: 302 })
   }
 
   async function logout(provider?: ProviderKeys | 'dev') {
-    const route = useRoute()
-
     await navigateTo(
-      `/auth${provider ? '/' + provider : ''}/logout?returnPath=${route.path}`,
+      `/auth${provider ? '/' + provider : ''}/logout`,
       {
         external: true,
       }

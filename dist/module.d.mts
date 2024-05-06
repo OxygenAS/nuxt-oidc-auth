@@ -153,6 +153,16 @@ interface OidcProviderConfig {
      */
     logoutUrl?: string;
     /**
+     * Logout include id token (only relevant if exposedIdToken is true)
+     * @default false
+     */
+    logoutIncludeIdToken?: boolean;
+    /**
+     * Query parameter name for id token. Will be appended to the logoutUrl as a query parameter. (only relevant if exposedIdToken is true)
+     * @default 'id_token_hint'
+     */
+    logoutIdTokenParameterName: string;
+    /**
      * Include scope in token request
      * @default false
      */

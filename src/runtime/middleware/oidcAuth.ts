@@ -8,7 +8,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   const { loggedIn, login } = useOidcAuth()
-
   if (loggedIn.value === true || to.path.startsWith('/auth')) {
     return
   }

@@ -20,6 +20,8 @@ export function defineOidcProvider<TConfig, TRequired extends keyof OidcProvider
     tokenUrl: '',
     responseType: 'code',
     authenticationScheme: 'header',
+    logoutIdTokenParameterName: 'id_token_hint',
+    logoutIncludeIdToken: false,
     grantType: 'authorization_code',
     pkce: false,
     state: true,

@@ -10,56 +10,27 @@ export default defineNuxtConfig({
     inlineStyles: false,
   },
   oidc: {
-    defaultProvider: 'github',
+    defaultProvider: 'oidc',
     providers: {
-      entra: {
-        redirectUri: 'http://localhost:3000/auth/entra/callback',
-        clientId: '',
-        clientSecret: '',
-        authorizationUrl: 'https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize',
-        tokenUrl: 'https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token',
-        userNameClaim: 'unique_name',
-        nonce: true,
-        responseType: 'code id_token',
-        scope: ['profile', 'openid', 'offline_access', 'email'],
-        logoutUrl: '',
-        optionalClaims: ['unique_name', 'family_name', 'given_name'],
-        audience: '',
-        additionalAuthParameters: {
-          resource: '',
-          prompt: 'select_account',
-        },
-        validateAccessToken: false,
-        validateIdToken: true,
-        exposeIdToken: true,
-      },
-      auth0: {
-        audience: 'test-api-oidc',
+      oidc: {
+        clientId: 'jubilaeum_website',
+        clientSecret: '59f293123c954ba7acc1e69a5d26ecaa',
         responseType: 'code',
-        redirectUri: 'http://localhost:3000/auth/auth0/callback',
-        baseUrl: '',
-        clientId: '',
-        clientSecret: '',
-        scope: ['openid', 'offline_access', 'profile', 'email'],
-        additionalTokenParameters: {
-          audience: 'test-api-oidc'
-        },
-        additionalAuthParameters: {
-          audience: 'test-api-oidc'
-        }
-      },
-      github: {
-        redirectUri: 'http://localhost:3000/auth/github/callback',
-        clientId: '',
-        clientSecret: '',
-        filterUserinfo: ['login', 'id', 'avatar_url', 'name', 'email'],
-      },
-      keycloak: {
-        audience: 'account',
-        baseUrl: '',
-        clientId: '',
-        clientSecret: '',
-        redirectUri: 'http://localhost:3000/auth/keycloak/callback',
+        authorizationUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/authorize',
+        userinfoUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/userInfo',
+        redirectUri: process.env.NUXT_PUBLIC_ORIGIN + '/auth/oidc/callback',
+        grantType: 'authorization_code',
+        scope: ['jubilaeum_website', 'realdania_application', 'openid', 'profile', 'offline_access', 'email'],
+        logoutUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/endsession',
+        responseMode: 'query',
+        tokenUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/token',
+        authenticationScheme: 'body',
+        tokenRequestType: 'form-urlencoded',
+        exposeAccessToken: true,
+        logoutRedirectParameterName: 'post_logout_redirect_uri',
+        logoutIdTokenParameterName: 'id_token_hint',
+        logoutIncludeIdToken: true,
+        exposeIdToken: true,
       }
     },
     session: {
@@ -68,18 +39,8 @@ export default defineNuxtConfig({
       expirationThreshold: 3600,
     },
     middleware: {
-      globalMiddlewareEnabled: true,
-      customLoginPage: true,
-    },
-    devMode: {
-      enabled: false,
-      generateAccessToken: true,
-      userName: 'Test User',
-      providerInfo: { providerName: 'test' },
-      claims: { customclaim01: 'foo', customclaim02: 'bar' },
-      issuer: 'dev-issuer',
-      audience: 'dev-app',
-      subject: 'dev-user',
+      globalMiddlewareEnabled: false,
+      customLoginPage: false,
     },
   },
   colorMode: {
