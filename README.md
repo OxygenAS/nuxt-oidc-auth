@@ -14,5 +14,8 @@ logoutIdTokenParameterName er som default sat til 'id_token_hint', men bliver ku
 logoutIdTokenParameterName: 'id_token_hint',
 logoutIncludeIdToken: true,
 ```
+
 Resten af config og dokumentation kan findes på 
 https://github.com/itpropro/nuxt-oidc-auth
+
+Tilføjet: return path ved login. Can overrides ved at sætte en cookie 'login-return-path-override' ({ path: 'string' })

@@ -5,7 +5,8 @@ export default callbackEventHandler({
   async onSuccess(event, { user }) {
     await setUserSession(event, user);
     const returnPath = JSON.parse(getCookie(event, "login-return-path") || "{}");
-    const pathString = returnPath?.path || "/";
-    return sendRedirect(event, pathString);
+    const overridingPath = JSON.parse(getCookie(event, "login-return-path-override") || "{}");
+    const pathString = overridingPath?.path ? overridingPath?.path : returnPath?.path;
+    return sendRedirect(event, pathString || "/");
   }
 });
