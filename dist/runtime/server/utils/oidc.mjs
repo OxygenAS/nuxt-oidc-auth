@@ -44,7 +44,8 @@ export async function refreshAccessToken(refreshToken, config) {
   }
   const tokens = {
     refreshToken: tokenResponse.refresh_token,
-    accessToken: tokenResponse.access_token
+    accessToken: tokenResponse.access_token,
+    idToken: tokenResponse.id_token ? tokenResponse.id_token : void 0
   };
   const user = {
     canRefresh: !!tokenResponse.refresh_token,

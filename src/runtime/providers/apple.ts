@@ -1,6 +1,4 @@
-import { ofetch } from 'ofetch'
 import { defineOidcProvider } from './provider'
-import { parseURL } from 'ufo'
 import type { OidcProviderConfig } from '../types/oidc'
 
 type AppleRequiredFields = 'clientId' | 'clientSecret' | 'authorizationUrl' | 'tokenUrl' | 'redirectUri'

@@ -275,8 +275,7 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
 
     // Clear session
     await clearUserSession(event)
-    // logoutIdTokenParameterName: 'id_token_hint',
-    // logoutIncludeIdToken: true,
+
     if (config.logoutUrl) {
       return sendRedirect(
         event,

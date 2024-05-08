@@ -43,7 +43,8 @@ export async function refreshUserSession(event) {
     exp: accessToken.exp || Math.trunc(Date.now() / 1e3) + Number.parseInt(expiresIn),
     iat: accessToken.iat || Math.trunc(Date.now() / 1e3),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
-    refreshToken: await encryptToken(tokens.refreshToken, tokenKey)
+    refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
+    idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : void 0
   };
   await useStorage("oidc").setItem(session.id, updatedPersistentSession);
   await session.update(defu(user, session.data));

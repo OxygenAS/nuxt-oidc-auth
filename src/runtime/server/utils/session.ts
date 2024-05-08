@@ -87,7 +87,8 @@ export async function refreshUserSession(event: H3Event) {
     exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn),
     iat: accessToken.iat || Math.trunc(Date.now() / 1000),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
-    refreshToken: await encryptToken(tokens.refreshToken, tokenKey)
+    refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
+    idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : undefined as any
   }
 
   await useStorage('oidc').setItem<PersistentSession>(session.id as string, updatedPersistentSession)

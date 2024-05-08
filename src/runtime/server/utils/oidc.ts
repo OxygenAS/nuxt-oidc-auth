@@ -57,9 +57,10 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
   }
 
   // Construct tokens object
-  const tokens: Record<'refreshToken' | 'accessToken', string> = {
+  const tokens: Record<'refreshToken' | 'accessToken' | 'idToken', string> = {
     refreshToken: tokenResponse.refresh_token as string,
     accessToken: tokenResponse.access_token,
+    idToken: tokenResponse.id_token ? tokenResponse.id_token : undefined as any
   }
 
   // Construct user object
