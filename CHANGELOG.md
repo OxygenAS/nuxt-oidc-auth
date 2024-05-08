@@ -1,6 +1,10 @@
 # Changelog
 
 
+## v0.12.4
+
+[compare changes](https://github.com/itpropro/nuxt-oidc-auth/compare/v0.12.4...v0.12.4)
+
 ## v0.12.3
 
 [compare changes](https://github.com/itpropro/nuxt-oidc-auth/compare/v0.12.2...v0.12.3)
