@@ -1,7 +1,7 @@
 {
   "name": "nuxt-oidc-auth",
   "private": false,
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "OIDC authentication module for Nuxt SSR",
   "repository": "itpropro/nuxt-oidc-auth",
   "homepage": "https://github.com/itpropro/nuxt-oidc-auth#readme",
@@ -27,7 +27,7 @@
     "client:dev": "nuxi dev client --port 3300",
     "dev": "nuxi dev playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground && nuxi prepare client",
-    "release": "pnpm lint && pnpm prepack && changelogen --release && git push --follow-tags && pnpm publish --access=public",
+    "release": "pnpm lint && pnpm prepack && changelogen --release",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"

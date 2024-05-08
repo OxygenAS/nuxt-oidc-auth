@@ -21,7 +21,7 @@ export const useOidcAuth = () => {
   async function login(provider) {
     const cookie = useCookie("login-return-path");
     const route = useRoute();
-    cookie.value = { path: route.path, query: route.params };
+    cookie.value = { path: route.fullPath };
     await navigateTo(`/auth${provider ? "/" + provider : ""}/login`, { external: true, redirectCode: 302 });
   }
   async function logout(provider) {

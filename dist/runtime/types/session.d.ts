@@ -14,7 +14,6 @@ export interface UserSession {
 }
 export interface ReturnPath {
     path: string;
-    query: Record<string, string | string[]>;
 }
 export interface Tokens {
     accessToken: JwtPayload;

@@ -6,8 +6,8 @@ export default callbackEventHandler({
   async onSuccess(event, { user }) {
     await setUserSession(event, user)
     const returnPath = JSON.parse(getCookie(event, 'login-return-path') || '{}') as ReturnPath
-    const pathString =  '/'
-    // returnPath?.path ||
-        return sendRedirect(event, '/')
+    const pathString = returnPath?.path || '/'
+
+    return sendRedirect(event, pathString)
   }
 })

@@ -52,15 +52,28 @@ export async function refreshUserSession(event) {
 export async function requireUserSession(event) {
   const logger = useOidcLogger();
   const userSession = await getUserSession(event);
+  const config = configMerger(useRuntimeConfig().oidc.providers[userSession.provider], providerPresets[userSession.provider]);
   if (Object.keys(userSession).length === 0) {
     throw createError({
       statusCode: 401,
       message: "Unauthorized"
     });
   }
+  const sessionId = await getUserSessionId(event);
+  const persistentSession = await useStorage("oidc").getItem(sessionId);
+  if (config.exposeAccessToken && persistentSession) {
+    const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+    userSession.accessToken = await decryptToken(persistentSession.accessToken, tokenKey);
+  } else {
+    logger.warn("Persistent user session not found");
+  }
+  if (config.exposeIdToken && persistentSession) {
+    const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+    userSession.idToken = await decryptToken(persistentSession.idToken, tokenKey);
+  } else {
+    logger.warn("Persistent user session not found");
+  }
   if (sessionConfig.expirationCheck) {
-    const sessionId = await getUserSessionId(event);
-    const persistentSession = await useStorage("oidc").getItem(sessionId);
     if (!persistentSession)
       logger.warn("Persistent user session not found");
     let expired = true;

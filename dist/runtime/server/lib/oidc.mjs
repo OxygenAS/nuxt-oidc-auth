@@ -182,10 +182,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
       user.claims = {};
       config.optionalClaims.forEach((claim) => parsedIdToken[claim] && (user.claims[claim] = parsedIdToken[claim]));
     }
-    if (config.exposeAccessToken)
-      user.accessToken = tokenResponse.access_token;
-    if (config.exposeIdToken)
-      user.idToken = tokenResponse.id_token;
     if (tokenResponse.refresh_token) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
       const persistentSession = {

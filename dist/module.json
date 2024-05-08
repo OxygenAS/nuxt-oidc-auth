@@ -5,5 +5,5 @@
     "nuxt": "^3.9.0",
     "bridge": false
   },
-  "version": "0.12.1"
+  "version": "0.12.2"
 }

@@ -5,7 +5,7 @@ import { ofetch } from 'ofetch'
 import { useRuntimeConfig, useStorage } from '#imports'
 import { validateConfig } from '../utils/config'
 import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from '../utils/security'
-import { getUserSessionId, clearUserSession, getUserSession } from '../utils/session'
+import { getUserSessionId, clearUserSession } from '../utils/session'
 import { configMerger, convertObjectToSnakeCase, convertTokenRequestToType, oidcErrorHandler, useOidcLogger } from '../utils/oidc'
 import { SignJWT } from 'jose'
 import * as providerPresets from '../../providers'
@@ -232,12 +232,12 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     // Expose access token
-    if (config.exposeAccessToken)
-      user.accessToken = tokenResponse.access_token
+    // if (config.exposeAccessToken)
+    //   user.accessToken = tokenResponse.access_token
 
 
-    if (config.exposeIdToken)
-      user.idToken = tokenResponse.id_token
+    // if (config.exposeIdToken)
+    //   user.idToken = tokenResponse.id_token
 
     if (tokenResponse.refresh_token) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string

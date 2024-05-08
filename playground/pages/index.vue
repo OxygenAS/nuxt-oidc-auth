@@ -5,6 +5,7 @@ const { providers } = useProviders(currentProvider.value as string)
 
 <template>
   <div class="w-full grid grid-cols-2">
+    <NuxtLink to="/test?test=hej">TEST Link</NuxtLink>
     <div class="col-start-1 flex flex-col gap-4 items-center">
       <p class="text-xl">
         Login with
