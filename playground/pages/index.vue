@@ -5,14 +5,16 @@ const { providers } = useProviders(currentProvider.value as string)
 
 <template>
   <div class="w-full grid grid-cols-2">
-    <NuxtLink to="/test?test=hej">TEST Link</NuxtLink>
+    <NuxtLink to="/test?test=hej">
+      TEST Link
+    </NuxtLink>
     <div class="col-start-1 flex flex-col gap-4 items-center">
       <p class="text-xl">
         Login with
       </p>
       <button
         class="btn-base btn-login"
-        @click="login()"
+        @click="login({ returnPath: '/test'})"
       >
         <span class="i-majesticons-login-line" />
         <span class="pl-2">Default provider</span>
@@ -22,7 +24,7 @@ const { providers } = useProviders(currentProvider.value as string)
         :key="index"
         class="btn-base btn-login"
         :disabled="provider.disabled"
-        @click="login(provider.name)"
+        @click="login({provider: provider.name})"
       >
         <span :class="provider.icon" />
         <span class="pl-2">{{ provider.label }}</span>

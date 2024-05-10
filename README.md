@@ -18,4 +18,4 @@ logoutIncludeIdToken: true,
 Resten af config og dokumentation kan findes på 
 https://github.com/itpropro/nuxt-oidc-auth
 
-Tilføjet: return path ved login. Can overrides ved at sætte en cookie 'login-return-path-override' ({ path: 'string' })
+Tilføjet: mulighed for setting return path ved login - login metoden fra composable tager nu et object {provider, returnPath} begge er optional

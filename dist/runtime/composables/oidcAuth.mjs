@@ -1,4 +1,4 @@
-import { useState, computed, useCookie, useRequestFetch, navigateTo, useRoute } from "#imports";
+import { useState, computed, useCookie, useRequestFetch, navigateTo } from "#imports";
 const useSessionState = () => useState("nuxt-oidc-auth-session", void 0);
 export const useOidcAuth = () => {
   const sessionState = useSessionState();
@@ -18,10 +18,11 @@ export const useOidcAuth = () => {
     await $fetch("/api/_auth/refresh", { method: "POST" });
     await fetch();
   }
-  async function login(provider) {
-    const cookie = useCookie("login-return-path");
-    const route = useRoute();
-    cookie.value = { path: route.fullPath };
+  async function login({ provider, returnPath } = {}) {
+    if (returnPath) {
+      const cookie = useCookie("login-return-path");
+      cookie.value = { path: returnPath };
+    }
     await navigateTo(`/auth${provider ? "/" + provider : ""}/login`, { external: true, redirectCode: 302 });
   }
   async function logout(provider) {

@@ -21,7 +21,7 @@ const { providers } = useProviders(currentProvider.value as string)
         :key="index"
         class="btn-base btn-login"
         :disabled="provider.disabled"
-        @click="login(provider.name)"
+        @click="login({provider: provider.name})"
       >
         <span :class="provider.icon" />
         <span class="pl-2">{{ provider.label }}</span>
