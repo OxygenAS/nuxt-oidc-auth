@@ -243,9 +243,7 @@ const module = defineNuxtModule({
     devtools: true
   },
   setup(options, nuxt) {
-    const runtimeConfig = nuxt.options.runtimeConfig;
     const logger = useLogger("nuxt-oidc-auth");
-    logger.info("Starting module with options", runtimeConfig);
     if (!options.enabled) {
       return;
     }

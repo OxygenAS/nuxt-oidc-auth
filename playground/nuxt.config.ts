@@ -11,11 +11,6 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     origin: 'http://localhost:3000',
-    oidcAuthorizationUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/authorize',
-    oidcUserinfoUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/userInfo',
-    oidcRedirectUri: process.env.NUXT_PUBLIC_ORIGIN + '/auth/oidc/callback',
-    oidcLogoutUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/endsession',
-    oidcTokenUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/token',
     public: {
       origin: 'http://localhost:3000',
       environment: 'development',
