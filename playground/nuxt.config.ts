@@ -9,6 +9,18 @@ export default defineNuxtConfig({
   features: {
     inlineStyles: false,
   },
+  runtimeConfig: {
+    origin: 'http://localhost:3000',
+    oidcAuthorizationUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/authorize',
+    public: {
+      origin: 'http://localhost:3000',
+      environment: 'development',
+      mediaEndpoint: 'https://localhost:44353',
+      it34MapUrl: 'https://testrealdaniamap.it34.com',
+      it34Endpoint: 'https://devrealdaniaapi.it34.com',
+
+    },
+  },
   oidc: {
     defaultProvider: 'oidc',
     providers: {

@@ -158,7 +158,10 @@ export default defineNuxtModule<ModuleOptions>({
     devtools: true,
   },
   setup(options, nuxt) {
+    const runtimeConfig = nuxt.options.runtimeConfig
     const logger = useLogger('nuxt-oidc-auth')
+    logger.success(`authorization url from runtime config ${runtimeConfig.oidcAuthorizationUrl}`)
+
     if (!options.enabled) { return }
 
     // App
