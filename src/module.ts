@@ -257,11 +257,7 @@ export default defineNuxtModule<ModuleOptions>({
     // Per provider tasks
     providers.forEach((provider) => {
       const baseUrl = process.env[`NUXT_OIDC_PROVIDERS_${provider.toUpperCase()}_BASE_URL`] || (options.providers as ProviderConfigs)[provider].baseUrl
-      if (runtimeConfig.oidcAuthorizationUrl) {
-        // (options.providers[provider] as OidcProviderConfig).authorizationUrl = runtimeConfig.oidcAuthorizationUrl
-        // (options.providers[provider] as OidcProviderConfig).tokenUrl = runtimeConfig.oidcTokenUrl
-        // (options.providers[provider] as OidcProviderConfig).userinfoUrl = runtimeConfig.oidcUserinfoUrl
-      }
+   
       // Generate provider routes
       if (baseUrl) {
         (options.providers[provider] as OidcProviderConfig).authorizationUrl = generateProviderUrl(baseUrl as string, providerPresets[provider].authorizationUrl);

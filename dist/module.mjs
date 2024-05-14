@@ -326,7 +326,6 @@ const module = defineNuxtModule({
     }
     providers.forEach((provider) => {
       const baseUrl = process.env[`NUXT_OIDC_PROVIDERS_${provider.toUpperCase()}_BASE_URL`] || options.providers[provider].baseUrl;
-      if (runtimeConfig.oidcAuthorizationUrl) ;
       if (baseUrl) {
         options.providers[provider].authorizationUrl = generateProviderUrl(baseUrl, providerPresets[provider].authorizationUrl);
         options.providers[provider].tokenUrl = generateProviderUrl(baseUrl, providerPresets[provider].tokenUrl);
