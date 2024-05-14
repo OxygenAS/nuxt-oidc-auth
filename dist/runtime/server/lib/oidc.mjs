@@ -56,6 +56,8 @@ export function loginEventHandler({ onError }) {
       if (!query.scope?.includes("openid"))
         query.scope = `openid ${query.scope}`;
     }
+    console.log("CONFIG", config);
+    console.log("RUNTIMECONFIG", useRuntimeConfig());
     return sendRedirect(
       event,
       config.encodeRedirectUri ? withQuery(config.authorizationUrl, query).replace(query.redirect_uri, encodeURI(query.redirect_uri)) : withQuery(config.authorizationUrl, query),

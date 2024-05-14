@@ -253,7 +253,7 @@ const module = defineNuxtModule({
     providerKeys.forEach((provider) => {
       const providerConfig = configToOverride[provider];
       const providerOverrides = overrides.filter((override) => override.startsWith(provider)).map((override) => override.split(provider)[1]).map((override) => override[0].toLowerCase() + override.slice(1));
-      providerOverrides.forEach((override) => {
+      providerOverrides?.forEach((override) => {
         const overrideKey = override;
         const value = runtimeConfig[`${provider}${override.charAt(0).toUpperCase() + override.slice(1)}`];
         updateConfig(overrideKey, value, providerConfig);
