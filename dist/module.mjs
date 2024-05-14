@@ -212,9 +212,6 @@ function setupDevToolsUI(nuxt, resolver) {
 }
 
 const RPC_NAMESPACE = "nuxt-oidc-auth-rpc";
-function updateConfig(key, value, config) {
-  return config[key] = value;
-}
 const { resolve } = createResolver(import.meta.url);
 const module = defineNuxtModule({
   meta: {
@@ -247,19 +244,8 @@ const module = defineNuxtModule({
   },
   setup(options, nuxt) {
     const runtimeConfig = nuxt.options.runtimeConfig;
-    const configToOverride = options.providers;
-    const providerKeys = Object.keys(configToOverride);
-    const overrides = Object.keys(runtimeConfig).filter((key) => providerKeys.some((provider) => key.startsWith(provider)));
-    providerKeys.forEach((provider) => {
-      const providerConfig = configToOverride[provider];
-      const providerOverrides = overrides.filter((override) => override.startsWith(provider)).map((override) => override.split(provider)[1]).map((override) => override[0].toLowerCase() + override.slice(1));
-      providerOverrides?.forEach((override) => {
-        const overrideKey = override;
-        const value = runtimeConfig[`${provider}${override.charAt(0).toUpperCase() + override.slice(1)}`];
-        updateConfig(overrideKey, value, providerConfig);
-      });
-    });
     const logger = useLogger("nuxt-oidc-auth");
+    logger.info("Starting module with options", runtimeConfig);
     if (!options.enabled) {
       return;
     }

@@ -161,20 +161,20 @@ export default defineNuxtModule<ModuleOptions>({
   },
   setup(options, nuxt) {
     const runtimeConfig = nuxt.options.runtimeConfig
-    const configToOverride = options.providers as ProviderConfigs
-    const providerKeys = Object.keys(configToOverride) as ProviderKeys[]
-    const overrides = Object.keys(runtimeConfig).filter(key => providerKeys.some(provider => key.startsWith(provider)))
-    providerKeys.forEach(provider => {
-      const providerConfig = configToOverride[provider]
-      const providerOverrides = overrides.filter(override => override.startsWith(provider)).map(override => override.split(provider)[1]).map(override => override[0].toLowerCase() + override.slice(1))
-      providerOverrides?.forEach((override) => {
-        const overrideKey: keyof OidcProviderConfig = override as keyof OidcProviderConfig
-        const value = runtimeConfig[`${provider}${override.charAt(0).toUpperCase() + override.slice(1)}`]!
-        updateConfig(overrideKey, value as any, providerConfig as OidcProviderConfig)
-      })
-    })
+    // const configToOverride = options.providers as ProviderConfigs
+    // const providerKeys = Object.keys(configToOverride) as ProviderKeys[]
+    // const overrides = Object.keys(runtimeConfig).filter(key => providerKeys.some(provider => key.startsWith(provider)))
+    // providerKeys.forEach(provider => {
+    //   const providerConfig = configToOverride[provider]
+    //   const providerOverrides = overrides.filter(override => override.startsWith(provider)).map(override => override.split(provider)[1]).map(override => override[0].toLowerCase() + override.slice(1))
+    //   providerOverrides?.forEach((override) => {
+    //     const overrideKey: keyof OidcProviderConfig = override as keyof OidcProviderConfig
+    //     const value = runtimeConfig[`${provider}${override.charAt(0).toUpperCase() + override.slice(1)}`]!
+    //     updateConfig(overrideKey, value as any, providerConfig as OidcProviderConfig)
+    //   })
+    // })
     const logger = useLogger('nuxt-oidc-auth')
-
+    logger.info('Starting module with options', runtimeConfig)
     if (!options.enabled) { return }
 
     // App
