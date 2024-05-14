@@ -126,9 +126,11 @@ declare module '@nuxt/schema' {
     oidc: ModuleOptions
   }
 }
+function updateConfig<Key extends keyof OidcProviderConfig>(key: Key, value: OidcProviderConfig[Key], config: OidcProviderConfig) {
+  return config[key] = value
+}
 
 const { resolve } = createResolver(import.meta.url)
-
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: 'nuxt-oidc-auth',
@@ -159,8 +161,19 @@ export default defineNuxtModule<ModuleOptions>({
   },
   setup(options, nuxt) {
     const runtimeConfig = nuxt.options.runtimeConfig
+    const configToOverride = options.providers as ProviderConfigs
+    const providerKeys = Object.keys(configToOverride) as ProviderKeys[]
+    const overrides = Object.keys(runtimeConfig).filter(key => providerKeys.some(provider => key.startsWith(provider)))
+    providerKeys.forEach(provider => {
+      const providerConfig = configToOverride[provider]
+      const providerOverrides = overrides.filter(override => override.startsWith(provider)).map(override => override.split(provider)[1]).map(override => override[0].toLowerCase() + override.slice(1))
+      providerOverrides.forEach((override) => {
+        const overrideKey: keyof OidcProviderConfig = override as keyof OidcProviderConfig
+        const value = runtimeConfig[`${provider}${override.charAt(0).toUpperCase() + override.slice(1)}`]!
+        updateConfig(overrideKey, value as any, providerConfig as OidcProviderConfig)
+      })
+    })
     const logger = useLogger('nuxt-oidc-auth')
-    logger.success(`authorization url from runtime config ${runtimeConfig.oidcAuthorizationUrl}`)
 
     if (!options.enabled) { return }
 
@@ -261,7 +274,11 @@ export default defineNuxtModule<ModuleOptions>({
     // Per provider tasks
     providers.forEach((provider) => {
       const baseUrl = process.env[`NUXT_OIDC_PROVIDERS_${provider.toUpperCase()}_BASE_URL`] || (options.providers as ProviderConfigs)[provider].baseUrl
-
+      if (runtimeConfig.oidcAuthorizationUrl) {
+        // (options.providers[provider] as OidcProviderConfig).authorizationUrl = runtimeConfig.oidcAuthorizationUrl
+        // (options.providers[provider] as OidcProviderConfig).tokenUrl = runtimeConfig.oidcTokenUrl
+        // (options.providers[provider] as OidcProviderConfig).userinfoUrl = runtimeConfig.oidcUserinfoUrl
+      }
       // Generate provider routes
       if (baseUrl) {
         (options.providers[provider] as OidcProviderConfig).authorizationUrl = generateProviderUrl(baseUrl as string, providerPresets[provider].authorizationUrl);
