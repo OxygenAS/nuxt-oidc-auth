@@ -6,7 +6,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (isErrorPage) {
     return
   }
-
   const { loggedIn, login } = useOidcAuth()
   if (loggedIn.value === true || to.path.startsWith('/auth')) {
     return

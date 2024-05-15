@@ -50,7 +50,7 @@ export default defineNuxtConfig({
       expirationThreshold: 3600,
     },
     middleware: {
-      globalMiddlewareEnabled: false,
+      globalMiddlewareEnabled: true,
       customLoginPage: false,
     },
   },

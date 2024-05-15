@@ -77,8 +77,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
       return onError(event, error2);
     }
     const session = await useAuthSession(event);
-    await session.clear();
-    deleteCookie(event, "oidc");
     const { code, state, id_token, admin_consent, error, error_description } = event.method === "POST" ? await readBody(event) : getQuery(event);
     if (admin_consent) {
       const url = getRequestURL(event);
@@ -197,6 +195,8 @@ export function callbackEventHandler({ onSuccess, onError }) {
       await useStorage("oidc").setItem(userSessionId, persistentSession);
       await useStorage("test").setItem(userSessionId, persistentSession);
     }
+    await session.clear();
+    deleteCookie(event, "oidc");
     return onSuccess(event, {
       user
     });
