@@ -26,6 +26,8 @@ export async function clearUserSession(event) {
 export async function refreshUserSession(event) {
   const session = await _useSession(event);
   const persistentSession = await useStorage("oidc").getItem(session.id);
+  console.log("persistentSession", persistentSession);
+  console.log("session.data", session.data);
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
     throw createError({
       statusCode: 500,
