@@ -78,11 +78,11 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
   }
 
   // Expose tokens
-  if (config.exposeAccessToken)
-    user.accessToken = tokenResponse.access_token
+  // if (config.exposeAccessToken)
+  //   user.accessToken = tokenResponse.access_token
 
-  if (config.exposeIdToken)
-    user.idToken = tokenResponse.id_token
+  // if (config.exposeIdToken)
+  //   user.idToken = tokenResponse.id_token
 
   return {
     user,

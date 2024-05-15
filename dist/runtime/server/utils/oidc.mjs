@@ -59,10 +59,6 @@ export async function refreshAccessToken(refreshToken, config) {
     user.claims = {};
     config.optionalClaims.forEach((claim) => parsedIdToken[claim] && (user.claims[claim] = parsedIdToken[claim]));
   }
-  if (config.exposeAccessToken)
-    user.accessToken = tokenResponse.access_token;
-  if (config.exposeIdToken)
-    user.idToken = tokenResponse.id_token;
   return {
     user,
     tokens,
