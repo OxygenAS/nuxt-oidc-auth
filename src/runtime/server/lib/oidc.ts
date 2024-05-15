@@ -92,7 +92,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     const session = await useAuthSession(event)
-
+    await session.clear()
+    deleteCookie(event, 'oidc')
     const { code, state, id_token, admin_consent, error, error_description }: { code: string, state: string, id_token: string, admin_consent: string, error: string, error_description: string } = event.method === 'POST' ? await readBody(event) : getQuery(event)
 
     // Check for admin consent callback
@@ -251,9 +252,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       await useStorage('oidc').setItem<PersistentSession>(userSessionId, persistentSession)
       await useStorage('test').setItem<PersistentSession>(userSessionId, persistentSession)
     }
-
-    await session.clear()
-    deleteCookie(event, 'oidc')
+    
+    
     return onSuccess(event, {
       user
     })
