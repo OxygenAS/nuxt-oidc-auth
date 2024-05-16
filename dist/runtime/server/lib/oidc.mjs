@@ -193,7 +193,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
       };
       const userSessionId = await getUserSessionId(event);
       await useStorage("oidc").setItem(userSessionId, persistentSession);
-      await useStorage("test").setItem(userSessionId, persistentSession);
     }
     await session.clear();
     deleteCookie(event, "oidc");

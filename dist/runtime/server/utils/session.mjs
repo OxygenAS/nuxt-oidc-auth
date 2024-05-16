@@ -106,6 +106,13 @@ export async function requireUserSession(event) {
 export async function getUserSessionId(event) {
   return (await _useSession(event)).id;
 }
+export async function getAccessToken(event) {
+  await requireUserSession(event);
+  const sessionId = await getUserSessionId(event);
+  const persistentSession = await useStorage("oidc").getItem(sessionId);
+  const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+  return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
+}
 let sessionConfig;
 function _useSession(event) {
   if (!sessionConfig) {

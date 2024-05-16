@@ -249,7 +249,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       }
       const userSessionId = await getUserSessionId(event)
       await useStorage('oidc').setItem<PersistentSession>(userSessionId, persistentSession)
-      await useStorage('test').setItem<PersistentSession>(userSessionId, persistentSession)
     }
     
     await session.clear()
