@@ -84,7 +84,7 @@ export async function refreshUserSession(event: H3Event) {
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing)
 
   const updatedPersistentSession: PersistentSession = {
-    exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn),
+    exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn * 60),
     iat: accessToken.iat || Math.trunc(Date.now() / 1000),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
@@ -113,19 +113,24 @@ export async function requireUserSession(event: H3Event) {
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
 
   // Expose access token
-  if (config.exposeAccessToken && persistentSession) {
-    const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
+  if (config.exposeAccessToken) {
+    if (persistentSession) {
+      const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
 
-    userSession.accessToken = await decryptToken(persistentSession.accessToken, tokenKey)
+      userSession.accessToken = await decryptToken(persistentSession.accessToken, tokenKey)
 
-  } else {
-    logger.warn('Persistent user session not found')
+    } else {
+      logger.warn('Persistent user session not found')
+    }
   }
-  if (config.exposeIdToken && persistentSession) {
-    const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
-    userSession.idToken = await decryptToken(persistentSession.idToken, tokenKey)
-  } else {
-    logger.warn('Persistent user session not found')
+  if (config.exposeIdToken) {
+
+    if (persistentSession) {
+      const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
+      userSession.idToken = await decryptToken(persistentSession.idToken, tokenKey)
+    } else {
+      logger.warn('Persistent user session not found')
+    }
   }
 
   // Expiration check
@@ -164,7 +169,8 @@ export async function requireUserSession(event: H3Event) {
 export async function getUserSessionId(event: H3Event) {
   return (await _useSession(event)).id as string
 }
-export async function getAccessToken(event: H3Event){
+export async function getAccessToken(event: H3Event) {
+  await requireUserSession(event)
   const sessionId = await getUserSessionId(event)
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
