@@ -165,7 +165,6 @@ export async function getUserSessionId(event: H3Event) {
   return (await _useSession(event)).id as string
 }
 export async function getAccessToken(event: H3Event){
-  await refreshUserSession(event)
   const sessionId = await getUserSessionId(event)
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
