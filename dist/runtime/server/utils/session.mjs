@@ -40,7 +40,7 @@ export async function refreshUserSession(event) {
   const { user, tokens, expiresIn } = await refreshAccessToken(refreshToken, config);
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing);
   const updatedPersistentSession = {
-    exp: accessToken.exp || Math.trunc(Date.now() / 1e3) + Number.parseInt(expiresIn),
+    exp: accessToken.exp || Math.trunc(Date.now() / 1e3) + Number.parseInt(expiresIn * 60),
     iat: accessToken.iat || Math.trunc(Date.now() / 1e3),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
