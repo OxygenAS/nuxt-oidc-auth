@@ -64,6 +64,7 @@ export async function refreshUserSession(event: H3Event) {
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(session.id as string) as PersistentSession | null
 
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
+    // TODO - maybe login again?
     throw createError({
       statusCode: 500,
       message: 'No refresh token'
@@ -84,7 +85,7 @@ export async function refreshUserSession(event: H3Event) {
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing)
 
   const updatedPersistentSession: PersistentSession = {
-    exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn * 60),
+    exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn),
     iat: accessToken.iat || Math.trunc(Date.now() / 1000),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
