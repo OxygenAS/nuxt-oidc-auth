@@ -37,17 +37,16 @@ export default defineNuxtConfig({
         responseMode: 'query',
         authenticationScheme: 'body',
         tokenRequestType: 'form-urlencoded',
-        exposeAccessToken: true,
+
         logoutRedirectParameterName: 'post_logout_redirect_uri',
         logoutIdTokenParameterName: 'id_token_hint',
         logoutIncludeIdToken: true,
-        exposeIdToken: true,
       }
     },
     session: {
       expirationCheck: true,
       automaticRefresh: true,
-      expirationThreshold: 3600,
+      expirationThreshold: 1200,
     },
     middleware: {
       globalMiddlewareEnabled: true,

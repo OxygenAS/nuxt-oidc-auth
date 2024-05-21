@@ -83,9 +83,10 @@ export async function refreshUserSession(event: H3Event) {
 
   // Replace the session storage
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing)
+  console.log('accessToken expiration', accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn))
 
   const updatedPersistentSession: PersistentSession = {
-    exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn * 60),
+    exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn),
     iat: accessToken.iat || Math.trunc(Date.now() / 1000),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
