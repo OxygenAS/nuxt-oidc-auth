@@ -119,7 +119,7 @@ export async function requireUserSession(event: H3Event) {
 
   const sessionId = await getUserSessionId(event)
   console.log('line 121', sessionId)
-  const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
+  let persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
 
   // Expose access token
   if (config.exposeAccessToken) {
@@ -154,17 +154,32 @@ export async function requireUserSession(event: H3Event) {
       console.log('line 148', expired)
       console.log('line 149', persistentSession?.exp, Math.trunc(Date.now() / 1000))
     }
-    // else if (userSession) {
-    //   expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
-    //   console.log('line 154', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
-    // } 
-    else {
-      console.log('line 153 session not found')
-      throw createError({
-        statusCode: 401,
-        message: 'Session not found'
-      })
+    else if (userSession) {
+      expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
+      console.log('line 59', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
+      if (!expired) {
+        await refreshUserSession(event)
+        const maybeNewSessionId = await getUserSessionId(event)
+        console.log('sessionIdCheck', sessionId, maybeNewSessionId)
+        persistentSession = await useStorage('oidc').getItem<PersistentSession>(maybeNewSessionId as string) as PersistentSession | null
+        if (!persistentSession) {
+          throw createError({
+            statusCode: 401,
+            message: 'Session not found'
+          })
+        }
+      }
     }
+    // else {
+    //   console.log('line 153 session not found')
+
+    //   await refreshUserSession(event)
+
+    //   // throw createError({
+    //   //   statusCode: 401,
+    //   //   message: 'Session not found'
+    //   // })
+    // }
     if (expired) {
       console.log('line 159', expired)
       logger.info('Session expired')

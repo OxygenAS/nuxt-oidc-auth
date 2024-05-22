@@ -69,7 +69,7 @@ export async function requireUserSession(event) {
   }
   const sessionId = await getUserSessionId(event);
   console.log("line 121", sessionId);
-  const persistentSession = await useStorage("oidc").getItem(sessionId);
+  let persistentSession = await useStorage("oidc").getItem(sessionId);
   if (config.exposeAccessToken) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
@@ -95,12 +95,21 @@ export async function requireUserSession(event) {
       expired = persistentSession?.exp <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
       console.log("line 148", expired);
       console.log("line 149", persistentSession?.exp, Math.trunc(Date.now() / 1e3));
-    } else {
-      console.log("line 153 session not found");
-      throw createError({
-        statusCode: 401,
-        message: "Session not found"
-      });
+    } else if (userSession) {
+      expired = userSession?.expireAt <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
+      console.log("line 59", expired, userSession?.expireAt, Math.trunc(Date.now() / 1e3));
+      if (!expired) {
+        await refreshUserSession(event);
+        const maybeNewSessionId = await getUserSessionId(event);
+        console.log("sessionIdCheck", sessionId, maybeNewSessionId);
+        persistentSession = await useStorage("oidc").getItem(maybeNewSessionId);
+        if (!persistentSession) {
+          throw createError({
+            statusCode: 401,
+            message: "Session not found"
+          });
+        }
+      }
     }
     if (expired) {
       console.log("line 159", expired);
