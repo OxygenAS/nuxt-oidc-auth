@@ -3,6 +3,7 @@ import { defu } from 'defu'
 import { createHooks } from 'hookable'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
+import { storageDriver} from './storage'
 import { configMerger, refreshAccessToken, useOidcLogger } from './oidc'
 import { decryptToken, encryptToken, parseJwtToken } from './security'
 import * as providerPresets from '../../providers'
@@ -54,7 +55,7 @@ export async function clearUserSession(event: H3Event) {
   await sessionHooks.callHookParallel('clear', session.data, event)
   // this is the persistent user session
   console.log('deleting persistent session')
-  await useStorage('oidc').removeItem(session.id as string, { removeMeta: true })
+  await storageDriver().removeItem(session.id as string, { removeMeta: true })
   await session.clear()
   deleteCookie(event, sessionName)
 
@@ -63,7 +64,7 @@ export async function clearUserSession(event: H3Event) {
 
 export async function refreshUserSession(event: H3Event) {
   const session = await _useSession(event)
-  const persistentSession = await useStorage('oidc').getItem<PersistentSession>(session.id as string) as PersistentSession | null
+  const persistentSession = await storageDriver().getItem<PersistentSession>(session.id as string) as PersistentSession | null
 
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
     console.log('line 67')
@@ -99,7 +100,7 @@ export async function refreshUserSession(event: H3Event) {
   }
   console.log('accessToken expiration', updatedPersistentSession.exp)
 
-  await useStorage('oidc').setItem<PersistentSession>(session.id as string, updatedPersistentSession)
+  await storageDriver().setItem<PersistentSession>(session.id as string, updatedPersistentSession)
   await session.update(defu(user, session.data))
 
   return true
@@ -119,13 +120,12 @@ export async function requireUserSession(event: H3Event) {
 
   const sessionId = await getUserSessionId(event)
   console.log('line 121', sessionId)
-  let persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
+  const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
 
   // Expose access token
   if (config.exposeAccessToken) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
-
       userSession.accessToken = await decryptToken(persistentSession.accessToken, tokenKey)
 
     } else {
@@ -154,32 +154,30 @@ export async function requireUserSession(event: H3Event) {
       console.log('line 148', expired)
       console.log('line 149', persistentSession?.exp, Math.trunc(Date.now() / 1000))
     }
-    else if (userSession) {
-      expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
-      console.log('line 59', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
-      if (!expired) {
-        await refreshUserSession(event)
-        const maybeNewSessionId = await getUserSessionId(event)
-        console.log('sessionIdCheck', sessionId, maybeNewSessionId)
-        persistentSession = await useStorage('oidc').getItem<PersistentSession>(maybeNewSessionId as string) as PersistentSession | null
-        if (!persistentSession) {
-          throw createError({
-            statusCode: 401,
-            message: 'Session not found'
-          })
-        }
-      }
-    }
-    // else {
-    //   console.log('line 153 session not found')
-
-    //   await refreshUserSession(event)
-
-    //   // throw createError({
-    //   //   statusCode: 401,
-    //   //   message: 'Session not found'
-    //   // })
+    // else if (userSession) {
+    //   expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
+    //   console.log('line 59', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
+    //   if (!expired) {
+    //     await refreshUserSession(event)
+    //     const maybeNewSessionId = await getUserSessionId(event)
+    //     console.log('sessionIdCheck', sessionId, maybeNewSessionId)
+    //     persistentSession = await storageDriver().getItem<PersistentSession>(maybeNewSessionId as string) as PersistentSession | null
+    //     if (!persistentSession) {
+    //       throw createError({
+    //         statusCode: 401,
+    //         message: 'Session not found'
+    //       })
+    //     }
+    //   }
     // }
+    else {
+      console.log('line 174 session not found')
+
+      throw createError({
+        statusCode: 401,
+        message: 'Session not found'
+      })
+    }
     if (expired) {
       console.log('line 159', expired)
       logger.info('Session expired')
@@ -209,7 +207,7 @@ export async function getUserSessionId(event: H3Event) {
 export async function getAccessToken(event: H3Event) {
   await requireUserSession(event)
   const sessionId = await getUserSessionId(event)
-  const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
+  const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
   return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
 }

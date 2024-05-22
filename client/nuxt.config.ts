@@ -8,7 +8,8 @@ export default defineNuxtConfig({
   nitro: {
     output: {
       publicDir: resolve(__dirname, '../dist/client')
-    }
+    },
+    
   },
   app: {
     baseURL: '/__nuxt-oidc-auth',

@@ -1,7 +1,8 @@
 import { H3Error, useSession, getRequestHeader, eventHandler, getQuery, sendRedirect, readBody, getRequestURL, deleteCookie } from "h3";
 import { withQuery, parseURL, normalizeURL } from "ufo";
 import { ofetch } from "ofetch";
-import { useRuntimeConfig, useStorage } from "#imports";
+import { useRuntimeConfig } from "#imports";
+import { storageDriver } from "../utils/storage.mjs";
 import { validateConfig } from "../utils/config.mjs";
 import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from "../utils/security.mjs";
 import { getUserSessionId, clearUserSession } from "../utils/session.mjs";
@@ -193,7 +194,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) }
       };
       const userSessionId = await getUserSessionId(event);
-      await useStorage("oidc").setItem(userSessionId, persistentSession);
+      await storageDriver().setItem(userSessionId, persistentSession);
     }
     await session.clear();
     deleteCookie(event, "oidc");
@@ -209,7 +210,7 @@ export function logoutEventHandler({ onSuccess }) {
     let idToken;
     if (config.logoutIncludeIdToken) {
       const userSessionId = await getUserSessionId(event);
-      const persistentSession = await useStorage("oidc").getItem(userSessionId);
+      const persistentSession = await storageDriver().getItem(userSessionId);
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
       idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null;
     }

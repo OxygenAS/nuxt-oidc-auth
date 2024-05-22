@@ -159,6 +159,7 @@ export default defineNuxtModule<ModuleOptions>({
   setup(options, nuxt) {
     const logger = useLogger('nuxt-oidc-auth')
     if (!options.enabled) { return }
+    
 
     // App
     addImportsDir(resolve('./runtime/composables'))

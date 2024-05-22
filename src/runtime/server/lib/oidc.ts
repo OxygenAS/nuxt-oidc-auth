@@ -3,6 +3,7 @@ import { withQuery, parseURL, normalizeURL } from 'ufo'
 import { ofetch } from 'ofetch'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
+import { storageDriver} from '../utils/storage'
 import { validateConfig } from '../utils/config'
 import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from '../utils/security'
 import { getUserSessionId, clearUserSession } from '../utils/session'
@@ -249,7 +250,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) },
       }
       const userSessionId = await getUserSessionId(event)
-      await useStorage('oidc').setItem<PersistentSession>(userSessionId, persistentSession)
+      await storageDriver().setItem<PersistentSession>(userSessionId, persistentSession)
     }
     
     await session.clear()
@@ -268,7 +269,7 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     let idToken
     if (config.logoutIncludeIdToken) {
       const userSessionId = await getUserSessionId(event)
-      const persistentSession = await useStorage('oidc').getItem<PersistentSession>(userSessionId) as PersistentSession | null
+      const persistentSession = await storageDriver().getItem<PersistentSession>(userSessionId) as PersistentSession | null
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null
     }

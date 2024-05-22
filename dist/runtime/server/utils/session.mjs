@@ -1,7 +1,8 @@
 import { useSession, createError, deleteCookie } from "h3";
 import { defu } from "defu";
 import { createHooks } from "hookable";
-import { useRuntimeConfig, useStorage } from "#imports";
+import { useRuntimeConfig } from "#imports";
+import { storageDriver } from "./storage.mjs";
 import { configMerger, refreshAccessToken, useOidcLogger } from "./oidc.mjs";
 import { decryptToken, encryptToken, parseJwtToken } from "./security.mjs";
 import * as providerPresets from "../../providers/index.mjs";
@@ -19,14 +20,14 @@ export async function clearUserSession(event) {
   const session = await _useSession(event);
   await sessionHooks.callHookParallel("clear", session.data, event);
   console.log("deleting persistent session");
-  await useStorage("oidc").removeItem(session.id, { removeMeta: true });
+  await storageDriver().removeItem(session.id, { removeMeta: true });
   await session.clear();
   deleteCookie(event, sessionName);
   return true;
 }
 export async function refreshUserSession(event) {
   const session = await _useSession(event);
-  const persistentSession = await useStorage("oidc").getItem(session.id);
+  const persistentSession = await storageDriver().getItem(session.id);
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
     console.log("line 67");
     throw createError({
@@ -53,7 +54,7 @@ export async function refreshUserSession(event) {
     idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : void 0
   };
   console.log("accessToken expiration", updatedPersistentSession.exp);
-  await useStorage("oidc").setItem(session.id, updatedPersistentSession);
+  await storageDriver().setItem(session.id, updatedPersistentSession);
   await session.update(defu(user, session.data));
   return true;
 }
@@ -69,7 +70,7 @@ export async function requireUserSession(event) {
   }
   const sessionId = await getUserSessionId(event);
   console.log("line 121", sessionId);
-  let persistentSession = await useStorage("oidc").getItem(sessionId);
+  const persistentSession = await storageDriver().getItem(sessionId);
   if (config.exposeAccessToken) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
@@ -95,21 +96,12 @@ export async function requireUserSession(event) {
       expired = persistentSession?.exp <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
       console.log("line 148", expired);
       console.log("line 149", persistentSession?.exp, Math.trunc(Date.now() / 1e3));
-    } else if (userSession) {
-      expired = userSession?.expireAt <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
-      console.log("line 59", expired, userSession?.expireAt, Math.trunc(Date.now() / 1e3));
-      if (!expired) {
-        await refreshUserSession(event);
-        const maybeNewSessionId = await getUserSessionId(event);
-        console.log("sessionIdCheck", sessionId, maybeNewSessionId);
-        persistentSession = await useStorage("oidc").getItem(maybeNewSessionId);
-        if (!persistentSession) {
-          throw createError({
-            statusCode: 401,
-            message: "Session not found"
-          });
-        }
-      }
+    } else {
+      console.log("line 174 session not found");
+      throw createError({
+        statusCode: 401,
+        message: "Session not found"
+      });
     }
     if (expired) {
       console.log("line 159", expired);
@@ -137,7 +129,7 @@ export async function getUserSessionId(event) {
 export async function getAccessToken(event) {
   await requireUserSession(event);
   const sessionId = await getUserSessionId(event);
-  const persistentSession = await useStorage("oidc").getItem(sessionId);
+  const persistentSession = await storageDriver().getItem(sessionId);
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
   return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
 }

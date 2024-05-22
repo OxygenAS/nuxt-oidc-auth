@@ -65,11 +65,11 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'node-server',
-    storage: { // Local file system storage for demo purposes
-      oidc: {
-        driver: 'fs',
-        base: 'playground/oidcstorage'
-      }
-    }
+    // storage: { // Local file system storage for demo purposes
+    //   oidc: {
+    //     driver: 'fs',
+    //     base: 'playground/oidcstorage'
+    //   }
+    // }
   },
 })
