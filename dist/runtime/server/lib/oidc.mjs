@@ -66,6 +66,7 @@ export function loginEventHandler({ onError }) {
 }
 export function callbackEventHandler({ onSuccess, onError }) {
   const logger = useOidcLogger();
+  console.log("callback");
   return eventHandler(async (event) => {
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
@@ -184,22 +185,22 @@ export function callbackEventHandler({ onSuccess, onError }) {
       user.claims = {};
       config.optionalClaims.forEach((claim) => parsedIdToken[claim] && (user.claims[claim] = parsedIdToken[claim]));
     }
+    let persistentSession;
     if (tokenResponse.refresh_token) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
-      const persistentSession = {
+      persistentSession = {
         exp: accessToken.exp,
         iat: accessToken.iat,
         accessToken: await encryptToken(tokenResponse.access_token, tokenKey),
         refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey),
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) }
       };
-      const userSessionId = await getUserSessionId(event);
-      await storageDriver().setItem(userSessionId, persistentSession);
     }
     await session.clear();
     deleteCookie(event, "oidc");
     return onSuccess(event, {
-      user
+      user,
+      persistentSession
     });
   });
 }

@@ -3,7 +3,7 @@ import { withQuery, parseURL, normalizeURL } from 'ufo'
 import { ofetch } from 'ofetch'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
-import { storageDriver} from '../utils/storage'
+import { storageDriver } from '../utils/storage'
 import { validateConfig } from '../utils/config'
 import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from '../utils/security'
 import { getUserSessionId, clearUserSession } from '../utils/session'
@@ -77,8 +77,9 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
   })
 }
 
-export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>) {
+export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>,  ) {
   const logger = useOidcLogger()
+  console.log('callback')
   return eventHandler(async (event: H3Event) => {
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
@@ -93,7 +94,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     const session = await useAuthSession(event)
- 
+
     const { code, state, id_token, admin_consent, error, error_description }: { code: string, state: string, id_token: string, admin_consent: string, error: string, error_description: string } = event.method === 'POST' ? await readBody(event) : getQuery(event)
 
     // Check for admin consent callback
@@ -239,24 +240,25 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     // if (config.exposeIdToken)
     //   user.idToken = tokenResponse.id_token
-
+    let persistentSession: PersistentSession | undefined
     if (tokenResponse.refresh_token) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
-      const persistentSession: PersistentSession = {
+      persistentSession = {
         exp: accessToken.exp as number,
         iat: accessToken.iat as number,
         accessToken: await encryptToken(tokenResponse.access_token, tokenKey),
         refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey),
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) },
       }
-      const userSessionId = await getUserSessionId(event)
-      await storageDriver().setItem<PersistentSession>(userSessionId, persistentSession)
+
     }
-    
+
     await session.clear()
     deleteCookie(event, 'oidc')
+
     return onSuccess(event, {
-      user
+      user,
+      persistentSession
     })
   })
 }
