@@ -154,6 +154,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: parseJwtToken(tokenResponse.id_token) }
       };
     }
+    console.log(accessToken.exp, "access token expiration");
     const timestamp = Math.trunc(Date.now() / 1e3);
     const user = {
       canRefresh: !!tokens.refreshToken,

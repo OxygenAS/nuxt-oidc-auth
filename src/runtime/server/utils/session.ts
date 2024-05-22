@@ -83,7 +83,6 @@ export async function refreshUserSession(event: H3Event) {
 
   // Replace the session storage
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing)
-  console.log('accessToken expiration', accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn))
 
   const updatedPersistentSession: PersistentSession = {
     exp: accessToken.exp || Math.trunc(Date.now() / 1000) + Number.parseInt(expiresIn),
@@ -92,6 +91,7 @@ export async function refreshUserSession(event: H3Event) {
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
     idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : undefined as any
   }
+  console.log('accessToken expiration', updatedPersistentSession.exp)
 
   await useStorage('oidc').setItem<PersistentSession>(session.id as string, updatedPersistentSession)
   await session.update(defu(user, session.data))
@@ -137,34 +137,45 @@ export async function requireUserSession(event: H3Event) {
 
   // Expiration check
   if (sessionConfig.expirationCheck) {
-    if (!persistentSession)
-      logger.warn('Persistent user session not found')
+    if (!persistentSession) {
+      logger.warn('Persistent user session not found, 141')
+    }
 
     let expired = true
     if (persistentSession) {
       expired = persistentSession?.exp <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
+      console.log('line 148', expired)
+      console.log('line 149', persistentSession?.exp, Math.trunc(Date.now() / 1000))
     } else if (userSession) {
       expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
+      console.log('line 154', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
     } else {
+      console.log('line 153 session not found')
       throw createError({
         statusCode: 401,
         message: 'Session not found'
       })
     }
     if (expired) {
+      console.log('line 159', expired)
       logger.info('Session expired')
       // Automatic token refresh
       if (sessionConfig.automaticRefresh) {
+        console.log('line 163 automatic refresh', userSession)
         await refreshUserSession(event)
+        
+        console.log('line 165 usersession refreshed', userSession)
         return userSession
       }
       await clearUserSession(event)
+      console.log('line 170 user session cleared session expired')
       throw createError({
         statusCode: 401,
         message: 'Session expired'
       })
     }
   }
+  console.log('line 178', userSession)
   return userSession
 }
 

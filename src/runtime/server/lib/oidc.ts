@@ -195,6 +195,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     // Construct user object
+    console.log(accessToken.exp, 'access token expiration')
     const timestamp = Math.trunc(Date.now() / 1000) // Use seconds instead of milliseconds to align with JWT
     const user: UserSession = {
       canRefresh: !!tokens.refreshToken,
