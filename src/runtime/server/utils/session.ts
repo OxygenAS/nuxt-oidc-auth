@@ -118,6 +118,7 @@ export async function requireUserSession(event: H3Event) {
   }
 
   const sessionId = await getUserSessionId(event)
+  console.log('line 121', sessionId)
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
 
   // Expose access token

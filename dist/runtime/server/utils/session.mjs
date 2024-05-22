@@ -68,6 +68,7 @@ export async function requireUserSession(event) {
     });
   }
   const sessionId = await getUserSessionId(event);
+  console.log("line 121", sessionId);
   const persistentSession = await useStorage("oidc").getItem(sessionId);
   if (config.exposeAccessToken) {
     if (persistentSession) {
