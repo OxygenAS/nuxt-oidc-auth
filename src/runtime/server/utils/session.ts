@@ -48,10 +48,12 @@ export async function setUserSession(event: H3Event, data: UserSession) {
 }
 
 export async function clearUserSession(event: H3Event) {
+
   const session = await _useSession(event)
 
   await sessionHooks.callHookParallel('clear', session.data, event)
-
+  // this is the persistent user session
+  console.log('deleting persistent session')
   await useStorage('oidc').removeItem(session.id as string, { removeMeta: true })
   await session.clear()
   deleteCookie(event, sessionName)
@@ -64,14 +66,16 @@ export async function refreshUserSession(event: H3Event) {
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(session.id as string) as PersistentSession | null
 
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
+    console.log('line 67')
     // TODO - maybe login again?
     throw createError({
       statusCode: 500,
       message: 'No refresh token'
     })
   }
-
+  console.log('line 74')
   await sessionHooks.callHookParallel('refresh', session.data, event)
+  console.log('line 76')
 
   // Refresh the access token
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
@@ -79,7 +83,9 @@ export async function refreshUserSession(event: H3Event) {
 
   const provider = session.data.provider as ProviderKeys
   const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
+  console.log('line 84')
   const { user, tokens, expiresIn } = await refreshAccessToken(refreshToken, config as OidcProviderConfig)
+  console.log('line 86')
 
   // Replace the session storage
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing)
@@ -146,10 +152,12 @@ export async function requireUserSession(event: H3Event) {
       expired = persistentSession?.exp <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
       console.log('line 148', expired)
       console.log('line 149', persistentSession?.exp, Math.trunc(Date.now() / 1000))
-    } else if (userSession) {
-      expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
-      console.log('line 154', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
-    } else {
+    }
+    // else if (userSession) {
+    //   expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
+    //   console.log('line 154', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
+    // } 
+    else {
       console.log('line 153 session not found')
       throw createError({
         statusCode: 401,
@@ -163,7 +171,7 @@ export async function requireUserSession(event: H3Event) {
       if (sessionConfig.automaticRefresh) {
         console.log('line 163 automatic refresh', userSession)
         await refreshUserSession(event)
-        
+
         console.log('line 165 usersession refreshed', userSession)
         return userSession
       }

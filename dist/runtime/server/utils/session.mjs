@@ -18,6 +18,7 @@ export async function setUserSession(event, data) {
 export async function clearUserSession(event) {
   const session = await _useSession(event);
   await sessionHooks.callHookParallel("clear", session.data, event);
+  console.log("deleting persistent session");
   await useStorage("oidc").removeItem(session.id, { removeMeta: true });
   await session.clear();
   deleteCookie(event, sessionName);
@@ -27,17 +28,22 @@ export async function refreshUserSession(event) {
   const session = await _useSession(event);
   const persistentSession = await useStorage("oidc").getItem(session.id);
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
+    console.log("line 67");
     throw createError({
       statusCode: 500,
       message: "No refresh token"
     });
   }
+  console.log("line 74");
   await sessionHooks.callHookParallel("refresh", session.data, event);
+  console.log("line 76");
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
   const refreshToken = await decryptToken(persistentSession.refreshToken, tokenKey);
   const provider = session.data.provider;
   const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
+  console.log("line 84");
   const { user, tokens, expiresIn } = await refreshAccessToken(refreshToken, config);
+  console.log("line 86");
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing);
   const updatedPersistentSession = {
     exp: accessToken.exp || Math.trunc(Date.now() / 1e3) + Number.parseInt(expiresIn),
@@ -88,9 +94,6 @@ export async function requireUserSession(event) {
       expired = persistentSession?.exp <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
       console.log("line 148", expired);
       console.log("line 149", persistentSession?.exp, Math.trunc(Date.now() / 1e3));
-    } else if (userSession) {
-      expired = userSession?.expireAt <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
-      console.log("line 154", expired, userSession?.expireAt, Math.trunc(Date.now() / 1e3));
     } else {
       console.log("line 153 session not found");
       throw createError({
