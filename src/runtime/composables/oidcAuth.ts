@@ -21,7 +21,7 @@ export const useOidcAuth = () => {
       }
     }).catch(async() => {
       return new Promise((resolve) => setTimeout(resolve, 1000)).then(async () => {
-        await useRequestFetch()('/api/_auth/session', {
+       return await useRequestFetch()('/api/_auth/session', {
           headers: {
             Accept: 'text/json'
           }
