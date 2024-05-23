@@ -12,7 +12,12 @@ export const useOidcAuth = () => {
       headers: {
         Accept: "text/json"
       }
-    }).catch(() => void 0);
+    }).catch(
+      () => {
+        console.log("fetching error");
+        return void 0;
+      }
+    );
   }
   async function refresh() {
     await $fetch("/api/_auth/refresh", { method: "POST" });

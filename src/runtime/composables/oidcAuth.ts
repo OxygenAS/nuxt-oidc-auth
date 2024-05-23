@@ -18,7 +18,11 @@ export const useOidcAuth = () => {
       headers: {
         Accept: 'text/json'
       }
-    }).catch(() => (undefined)) as UserSession)
+    }).catch(() => {
+      console.log('fetching error')
+      return (undefined)
+    }
+    ) as UserSession)
   }
 
   async function refresh() {
