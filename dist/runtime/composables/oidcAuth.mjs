@@ -13,15 +13,7 @@ export const useOidcAuth = () => {
       headers: {
         Accept: "text/json"
       }
-    }).catch(async () => {
-      return new Promise((resolve) => setTimeout(resolve, 1e3)).then(async () => {
-        return await useRequestFetch()("/api/_auth/session", {
-          headers: {
-            Accept: "text/json"
-          }
-        }).catch(() => void 0);
-      });
-    });
+    }).catch(() => void 0);
   }
   async function refresh() {
     console.log("refresh");
