@@ -26,4 +26,4 @@ export declare function clearUserSession(event: H3Event): Promise<boolean>;
 export declare function refreshUserSession(event: H3Event): Promise<boolean>;
 export declare function requireUserSession(event: H3Event): Promise<UserSession>;
 export declare function getUserSessionId(event: H3Event): Promise<string>;
-export declare function getAccessToken(event: H3Event): Promise<string | null>;
+export declare function getAccessToken(event: H3Event): Promise<string | null | undefined>;

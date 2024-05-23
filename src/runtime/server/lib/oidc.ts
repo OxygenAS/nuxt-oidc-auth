@@ -80,7 +80,9 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
 export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>,  ) {
   const logger = useOidcLogger()
   console.log('callback')
+  
   return eventHandler(async (event: H3Event) => {
+    console.log('hej')
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
 
@@ -197,7 +199,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     // Construct user object
-    console.log(accessToken.exp, 'access token expiration')
+    console.log(accessToken.exp, 'access token expiration, callback')
     const timestamp = Math.trunc(Date.now() / 1000) // Use seconds instead of milliseconds to align with JWT
     const user: UserSession = {
       canRefresh: !!tokens.refreshToken,
@@ -260,7 +262,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       user,
       persistentSession
     })
-  })
+  }, )
 }
 
 export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {

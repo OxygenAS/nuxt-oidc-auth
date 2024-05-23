@@ -1,11 +1,20 @@
 <script setup lang="ts">
+import { onMounted,  } from '#imports'
+
 const { loggedIn, user, refresh, login, logout, currentProvider, clear } = useOidcAuth()
 const { providers } = useProviders(currentProvider.value as string)
+const checkAccessToken = async () => {return await $fetch('/api/getAccessToken', { method: 'Get' })}
+onMounted(async() => {
+  await checkAccessToken()
+})
 </script>
 
 <template>
   <div class="w-full grid grid-cols-2">
     <div class="col-start-1 flex flex-col gap-4 items-center">
+      <NuxtLink to="/">
+        Home
+      </NuxtLink>
       <p class="text-xl">
         Login with
       </p>

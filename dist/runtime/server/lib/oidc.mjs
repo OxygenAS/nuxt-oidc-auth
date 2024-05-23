@@ -68,6 +68,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
   const logger = useOidcLogger();
   console.log("callback");
   return eventHandler(async (event) => {
+    console.log("hej");
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
     const validationResult = validateConfig(config, config.requiredProperties);
@@ -156,7 +157,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: parseJwtToken(tokenResponse.id_token) }
       };
     }
-    console.log(accessToken.exp, "access token expiration");
+    console.log(accessToken.exp, "access token expiration, callback");
     const timestamp = Math.trunc(Date.now() / 1e3);
     const user = {
       canRefresh: !!tokens.refreshToken,

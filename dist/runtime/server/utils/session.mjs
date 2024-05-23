@@ -19,7 +19,6 @@ export async function setUserSession(event, data) {
 export async function clearUserSession(event) {
   const session = await _useSession(event);
   await sessionHooks.callHookParallel("clear", session.data, event);
-  console.log("deleting persistent session");
   await storageDriver().removeItem(session.id, { removeMeta: true });
   await session.clear();
   deleteCookie(event, sessionName);
@@ -27,6 +26,7 @@ export async function clearUserSession(event) {
 }
 export async function refreshUserSession(event) {
   const session = await _useSession(event);
+  console.log("line 66", session.id);
   const persistentSession = await storageDriver().getItem(session.id);
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
     console.log("line 67");
@@ -128,10 +128,19 @@ export async function getUserSessionId(event) {
 }
 export async function getAccessToken(event) {
   await requireUserSession(event);
-  const sessionId = await getUserSessionId(event);
-  const persistentSession = await storageDriver().getItem(sessionId);
-  const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
-  return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
+  const session = await _useSession(event);
+  if (!session) {
+    setTimeout(async () => {
+      const sessionId = await getUserSessionId(event);
+      const persistentSession = await storageDriver().getItem(sessionId);
+      const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+      return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
+    }, 1e3);
+  } else {
+    const persistentSession = await storageDriver().getItem(session?.id);
+    const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+    return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
+  }
 }
 let sessionConfig;
 function _useSession(event) {

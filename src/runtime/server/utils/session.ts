@@ -3,7 +3,7 @@ import { defu } from 'defu'
 import { createHooks } from 'hookable'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
-import { storageDriver} from './storage'
+import { storageDriver } from './storage'
 import { configMerger, refreshAccessToken, useOidcLogger } from './oidc'
 import { decryptToken, encryptToken, parseJwtToken } from './security'
 import * as providerPresets from '../../providers'
@@ -54,7 +54,6 @@ export async function clearUserSession(event: H3Event) {
 
   await sessionHooks.callHookParallel('clear', session.data, event)
   // this is the persistent user session
-  console.log('deleting persistent session')
   await storageDriver().removeItem(session.id as string, { removeMeta: true })
   await session.clear()
   deleteCookie(event, sessionName)
@@ -64,6 +63,7 @@ export async function clearUserSession(event: H3Event) {
 
 export async function refreshUserSession(event: H3Event) {
   const session = await _useSession(event)
+  console.log('line 66', session.id)
   const persistentSession = await storageDriver().getItem<PersistentSession>(session.id as string) as PersistentSession | null
 
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
@@ -206,10 +206,19 @@ export async function getUserSessionId(event: H3Event) {
 }
 export async function getAccessToken(event: H3Event) {
   await requireUserSession(event)
-  const sessionId = await getUserSessionId(event)
-  const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
-  const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
-  return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
+  const session = await _useSession(event)
+  if (!session) {
+    setTimeout(async () => {
+      const sessionId = await getUserSessionId(event)
+      const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
+      const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
+      return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
+    }, 1000)
+  } else {
+    const persistentSession = await storageDriver().getItem<PersistentSession>(session?.id as string) as PersistentSession | null
+    const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
+    return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
+  }
 }
 let sessionConfig: SessionConfig & AuthSessionConfig
 

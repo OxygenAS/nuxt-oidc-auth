@@ -4,8 +4,10 @@ import { onMounted, ref } from '#imports'
 const { loggedIn, user, refresh, login, logout, currentProvider, clear } = useOidcAuth()
 const { providers } = useProviders(currentProvider.value as string)
 // const counter = ref(0)
-// const checkAccessToken = async () => {return await $fetch('/api/getAccessToken', { method: 'Get' })}
-
+const checkAccessToken = async () => {return await $fetch('/api/getAccessToken', { method: 'Get' })}
+  await checkAccessToken()
+onMounted(async() => {
+})
 // onMounted(() => {
 //   if(loggedIn.value) {
 //     checkAccessToken()
