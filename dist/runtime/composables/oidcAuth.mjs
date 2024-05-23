@@ -8,11 +8,20 @@ export const useOidcAuth = () => {
   });
   const currentProvider = computed(() => sessionState.value?.provider || void 0);
   async function fetch() {
+    console.log("fetching from composable");
     useSessionState().value = await useRequestFetch()("/api/_auth/session", {
       headers: {
         Accept: "text/json"
       }
-    }).catch(() => void 0);
+    }).catch(async () => {
+      return new Promise((resolve) => setTimeout(resolve, 1e3)).then(async () => {
+        await useRequestFetch()("/api/_auth/session", {
+          headers: {
+            Accept: "text/json"
+          }
+        }).catch(() => void 0);
+      });
+    });
   }
   async function refresh() {
     console.log("refresh");

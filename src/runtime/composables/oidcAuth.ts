@@ -8,17 +8,27 @@ const useSessionState = () => useState<UserSession>('nuxt-oidc-auth-session', un
 export const useOidcAuth = () => {
   const sessionState: Ref<UserSession> = useSessionState()
   const user: ComputedRef<UserSession> = computed(() => sessionState.value || undefined)
-  
+
   const loggedIn: ComputedRef<boolean> = computed<boolean>(() => {
     return Boolean(sessionState.value)
   })
   const currentProvider: ComputedRef<ProviderKeys | undefined | 'dev'> = computed(() => sessionState.value?.provider || undefined)
   async function fetch() {
+    console.log('fetching from composable')
     useSessionState().value = (await useRequestFetch()('/api/_auth/session', {
       headers: {
         Accept: 'text/json'
       }
-    }).catch(() => (undefined)) as UserSession)
+    }).catch(async() => {
+      return new Promise((resolve) => setTimeout(resolve, 1000)).then(async () => {
+        await useRequestFetch()('/api/_auth/session', {
+          headers: {
+            Accept: 'text/json'
+          }
+        }).catch(() => (undefined)) as UserSession
+      })
+
+    }) as UserSession)
   }
 
   async function refresh() {
@@ -27,11 +37,10 @@ export const useOidcAuth = () => {
     await fetch()
   }
 
-  async function login({provider, returnPath}: {provider?: ProviderKeys, returnPath?: string} = {}) {
-    if(returnPath) {
-      
+  async function login({ provider, returnPath }: { provider?: ProviderKeys, returnPath?: string } = {}) {
+    if (returnPath) {
       const cookie = useCookie('login-return-path') as Ref<ReturnPath>
-      cookie.value = { path: returnPath  }
+      cookie.value = { path: returnPath }
     }
     await navigateTo(`/auth${provider ? '/' + provider : ''}/login`, { external: true, redirectCode: 302 })
   }
