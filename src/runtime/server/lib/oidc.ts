@@ -76,9 +76,9 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
   })
 }
 
-export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>,  ) {
+export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>,) {
   const logger = useOidcLogger()
-  
+
   return eventHandler(async (event: H3Event) => {
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
@@ -240,6 +240,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     //   user.idToken = tokenResponse.id_token
     let persistentSession: PersistentSession | undefined
     if (tokenResponse.refresh_token) {
+      console.log('refresh token', tokenResponse.refresh_token)
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       persistentSession = {
         exp: accessToken.exp as number,
@@ -250,7 +251,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       }
 
     }
-
+    console.log('after init persistent session', persistentSession)
     await session.clear()
     deleteCookie(event, 'oidc')
 
@@ -258,7 +259,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       user,
       persistentSession
     })
-  }, )
+  },)
 }
 
 export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {

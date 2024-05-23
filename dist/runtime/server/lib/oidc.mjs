@@ -185,6 +185,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
     }
     let persistentSession;
     if (tokenResponse.refresh_token) {
+      console.log("refresh token", tokenResponse.refresh_token);
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
       persistentSession = {
         exp: accessToken.exp,
@@ -194,6 +195,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) }
       };
     }
+    console.log("after init persistent session", persistentSession);
     await session.clear();
     deleteCookie(event, "oidc");
     return onSuccess(event, {
