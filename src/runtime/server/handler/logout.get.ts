@@ -3,7 +3,7 @@ import { sendRedirect } from 'h3'
 
 export default logoutEventHandler({
   async onSuccess(event) {
-    console.log('hihi')
+    console.log('logging out')
     return sendRedirect(event, '/', 302)
   }
 })
