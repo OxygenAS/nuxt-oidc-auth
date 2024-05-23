@@ -66,6 +66,7 @@ export function loginEventHandler({ onError }) {
 export function callbackEventHandler({ onSuccess, onError }) {
   const logger = useOidcLogger();
   return eventHandler(async (event) => {
+    await clearUserSession(event);
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
     const validationResult = validateConfig(config, config.requiredProperties);

@@ -80,6 +80,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
   const logger = useOidcLogger()
 
   return eventHandler(async (event: H3Event) => {
+    await clearUserSession(event)
+
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
     const validationResult = validateConfig(config, config.requiredProperties)

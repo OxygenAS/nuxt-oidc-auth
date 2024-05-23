@@ -12,6 +12,7 @@ import type { AuthSessionConfig, UserSession } from '../../types/session'
 import type { OidcProviderConfig, PersistentSession, ProviderKeys } from '../../types/oidc'
 
 const sessionName = 'nuxt-oidc-auth'
+let sessionConfig: SessionConfig & AuthSessionConfig
 
 export interface SessionHooks {
   /**
@@ -106,7 +107,8 @@ export async function refreshUserSession(event: H3Event) {
 
 export async function requireUserSession(event: H3Event) {
   const logger = useOidcLogger()
-  const userSession = await getUserSession(event)
+  const session = await _useSession(event)
+  const userSession = session.data
   const config = configMerger(useRuntimeConfig().oidc.providers[userSession.provider] as OidcProviderConfig, providerPresets[userSession.provider])
 
   if (Object.keys(userSession).length === 0) {
@@ -116,7 +118,7 @@ export async function requireUserSession(event: H3Event) {
     })
   }
 
-  const sessionId = await getUserSessionId(event)
+  const sessionId = session.id
   console.log('line 121', sessionId)
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
 
@@ -152,22 +154,6 @@ export async function requireUserSession(event: H3Event) {
       console.log('line 148', expired)
       console.log('line 149', persistentSession?.exp, Math.trunc(Date.now() / 1000))
     }
-    // else if (userSession) {
-    //   expired = userSession?.expireAt <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
-    //   console.log('line 59', expired, userSession?.expireAt, Math.trunc(Date.now() / 1000))
-    //   if (!expired) {
-    //     await refreshUserSession(event)
-    //     const maybeNewSessionId = await getUserSessionId(event)
-    //     console.log('sessionIdCheck', sessionId, maybeNewSessionId)
-    //     persistentSession = await useStorage('oidc').getItem<PersistentSession>(maybeNewSessionId as string) as PersistentSession | null
-    //     if (!persistentSession) {
-    //       throw createError({
-    //         statusCode: 401,
-    //         message: 'Session not found'
-    //       })
-    //     }
-    //   }
-    // }
     else {
       console.log('line 174 session not found')
 
@@ -177,25 +163,26 @@ export async function requireUserSession(event: H3Event) {
       })
     }
     if (expired) {
-      console.log('line 159', expired)
+      console.log('line 165', expired)
       logger.info('Session expired')
       // Automatic token refresh
       if (sessionConfig.automaticRefresh) {
-        console.log('line 163 automatic refresh', userSession)
+        console.log('line 169 automatic refresh', userSession)
         await refreshUserSession(event)
 
-        console.log('line 165 usersession refreshed', userSession)
+        console.log('line 172 usersession refreshed', userSession)
         return userSession
       }
+      console.log('line 175 user session clearing')
       await clearUserSession(event)
-      console.log('line 170 user session cleared session expired')
+      console.log('line 177 user session cleared session expired')
       throw createError({
         statusCode: 401,
         message: 'Session expired'
       })
     }
   }
-  console.log('line 178', userSession)
+  console.log('line 184', userSession)
   return userSession
 }
 
@@ -203,14 +190,18 @@ export async function getUserSessionId(event: H3Event) {
   return (await _useSession(event)).id as string
 }
 export async function getAccessToken(event: H3Event) {
-  // await requireUserSession(event)
-  // await refreshAccessToken(event)
-  const sessionId = await getUserSessionId(event)
+  await requireUserSession(event)
+  await refreshUserSession(event)
+  const session = await _useSession(event)
+  const sessionId = session.id
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
-  return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
+  const accessToken = await decryptToken(persistentSession.accessToken, tokenKey) || null
+  return accessToken
+
+
+
 }
-let sessionConfig: SessionConfig & AuthSessionConfig
 
 function _useSession(event: H3Event) {
   if (!sessionConfig) {
