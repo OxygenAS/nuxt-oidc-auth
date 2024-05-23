@@ -252,8 +252,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     }
     console.log('after init persistent session', persistentSession)
-    await session.clear()
-    deleteCookie(event, 'oidc')
+    // await session.clear()
+    // deleteCookie(event, 'oidc')
 
     return onSuccess(event, {
       user,

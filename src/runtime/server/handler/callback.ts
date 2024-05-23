@@ -8,7 +8,6 @@ import { sendRedirect, getCookie, deleteCookie } from 'h3'
 
 export default callbackEventHandler({
   async onSuccess(event, { user, persistentSession = null }) {
-    console.log('on callback success persistent session',persistentSession)
     await setUserSession(event, user as UserSession)
     if (persistentSession) {
       const sessionId = await getUserSessionId(event)

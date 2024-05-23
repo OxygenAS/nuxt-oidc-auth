@@ -196,8 +196,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
       };
     }
     console.log("after init persistent session", persistentSession);
-    await session.clear();
-    deleteCookie(event, "oidc");
     return onSuccess(event, {
       user,
       persistentSession
