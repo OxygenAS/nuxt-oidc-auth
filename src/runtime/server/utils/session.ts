@@ -206,11 +206,12 @@ export async function getUserSessionId(event: H3Event) {
 }
 export async function getAccessToken(event: H3Event) {
   const session = await _useSession(event)
+  console.log('line 209', session)
+  
   if (!session) {
     setTimeout(async () => {
-      await requireUserSession(event)
-      const sessionId = await getUserSessionId(event)
       console.log('set timeout')
+      const sessionId = await getUserSessionId(event)
       const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
