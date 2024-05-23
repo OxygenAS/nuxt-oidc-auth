@@ -270,7 +270,7 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     let idToken
     if (config.logoutIncludeIdToken) {
       const userSessionId = await getUserSessionId(event)
-      const persistentSession = await storageDriver().getItem<PersistentSession>(userSessionId) as PersistentSession | null
+      const persistentSession = await useStorage('oidc').getItem<PersistentSession>(userSessionId) as PersistentSession | null
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null
     }

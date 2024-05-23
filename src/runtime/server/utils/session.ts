@@ -54,7 +54,7 @@ export async function clearUserSession(event: H3Event) {
 
   await sessionHooks.callHookParallel('clear', session.data, event)
   // this is the persistent user session
-  await storageDriver().removeItem(session.id as string, { removeMeta: true })
+  await useStorage('oidc').removeItem(session.id as string, { removeMeta: true })
   await session.clear()
   deleteCookie(event, sessionName)
 
@@ -64,7 +64,7 @@ export async function clearUserSession(event: H3Event) {
 export async function refreshUserSession(event: H3Event) {
   const session = await _useSession(event)
   console.log('line 66', session.id)
-  const persistentSession = await storageDriver().getItem<PersistentSession>(session.id as string) as PersistentSession | null
+  const persistentSession = await useStorage('oidc').getItem<PersistentSession>(session.id as string) as PersistentSession | null
 
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
     console.log('line 67')
@@ -98,9 +98,8 @@ export async function refreshUserSession(event: H3Event) {
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
     idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : undefined as any
   }
-  console.log('accessToken expiration', updatedPersistentSession.exp)
 
-  await storageDriver().setItem<PersistentSession>(session.id as string, updatedPersistentSession)
+  await useStorage('oidc').setItem<PersistentSession>(session.id as string, updatedPersistentSession)
   await session.update(defu(user, session.data))
 
   return true
@@ -120,7 +119,7 @@ export async function requireUserSession(event: H3Event) {
 
   const sessionId = await getUserSessionId(event)
   console.log('line 121', sessionId)
-  const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
+  const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
 
   // Expose access token
   if (config.exposeAccessToken) {
@@ -161,7 +160,7 @@ export async function requireUserSession(event: H3Event) {
     //     await refreshUserSession(event)
     //     const maybeNewSessionId = await getUserSessionId(event)
     //     console.log('sessionIdCheck', sessionId, maybeNewSessionId)
-    //     persistentSession = await storageDriver().getItem<PersistentSession>(maybeNewSessionId as string) as PersistentSession | null
+    //     persistentSession = await useStorage('oidc').getItem<PersistentSession>(maybeNewSessionId as string) as PersistentSession | null
     //     if (!persistentSession) {
     //       throw createError({
     //         statusCode: 401,
@@ -207,7 +206,7 @@ export async function getUserSessionId(event: H3Event) {
 export async function getAccessToken(event: H3Event) {
   await requireUserSession(event)
   const sessionId = await getUserSessionId(event)
-  const persistentSession = await storageDriver().getItem<PersistentSession>(sessionId as string) as PersistentSession | null
+  const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
   return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null
 }

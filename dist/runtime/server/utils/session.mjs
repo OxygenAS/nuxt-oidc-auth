@@ -1,8 +1,7 @@
 import { useSession, createError, deleteCookie } from "h3";
 import { defu } from "defu";
 import { createHooks } from "hookable";
-import { useRuntimeConfig } from "#imports";
-import { storageDriver } from "./storage.mjs";
+import { useRuntimeConfig, useStorage } from "#imports";
 import { configMerger, refreshAccessToken, useOidcLogger } from "./oidc.mjs";
 import { decryptToken, encryptToken, parseJwtToken } from "./security.mjs";
 import * as providerPresets from "../../providers/index.mjs";
@@ -19,7 +18,7 @@ export async function setUserSession(event, data) {
 export async function clearUserSession(event) {
   const session = await _useSession(event);
   await sessionHooks.callHookParallel("clear", session.data, event);
-  await storageDriver().removeItem(session.id, { removeMeta: true });
+  await useStorage("oidc").removeItem(session.id, { removeMeta: true });
   await session.clear();
   deleteCookie(event, sessionName);
   return true;
@@ -27,7 +26,7 @@ export async function clearUserSession(event) {
 export async function refreshUserSession(event) {
   const session = await _useSession(event);
   console.log("line 66", session.id);
-  const persistentSession = await storageDriver().getItem(session.id);
+  const persistentSession = await useStorage("oidc").getItem(session.id);
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
     console.log("line 67");
     throw createError({
@@ -53,8 +52,7 @@ export async function refreshUserSession(event) {
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
     idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : void 0
   };
-  console.log("accessToken expiration", updatedPersistentSession.exp);
-  await storageDriver().setItem(session.id, updatedPersistentSession);
+  await useStorage("oidc").setItem(session.id, updatedPersistentSession);
   await session.update(defu(user, session.data));
   return true;
 }
@@ -70,7 +68,7 @@ export async function requireUserSession(event) {
   }
   const sessionId = await getUserSessionId(event);
   console.log("line 121", sessionId);
-  const persistentSession = await storageDriver().getItem(sessionId);
+  const persistentSession = await useStorage("oidc").getItem(sessionId);
   if (config.exposeAccessToken) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
@@ -129,7 +127,7 @@ export async function getUserSessionId(event) {
 export async function getAccessToken(event) {
   await requireUserSession(event);
   const sessionId = await getUserSessionId(event);
-  const persistentSession = await storageDriver().getItem(sessionId);
+  const persistentSession = await useStorage("oidc").getItem(sessionId);
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
   return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
 }

@@ -18,14 +18,11 @@ export const useOidcAuth = () => {
       headers: {
         Accept: 'text/json'
       }
-    }).catch(() => {
-      console.log('fetching error')
-      return (undefined)
-    }
-    ) as UserSession)
+    }).catch(() => (undefined)) as UserSession)
   }
 
   async function refresh() {
+    console.log('refresh')
     await $fetch('/api/_auth/refresh', { method: 'POST' })
     await fetch()
   }
