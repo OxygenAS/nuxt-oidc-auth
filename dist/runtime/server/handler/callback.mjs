@@ -10,7 +10,9 @@ export default callbackEventHandler({
       await useStorage("oidc").setItem(sessionId, persistentSession);
     }
     const returnPath = JSON.parse(getCookie(event, "login-return-path") || "{}");
+    console.log("returnPath", returnPath);
     const pathString = returnPath?.path || "/";
+    console.log("pathStrig", pathString);
     deleteCookie(event, "login-return-path");
     return sendRedirect(event, pathString);
   }

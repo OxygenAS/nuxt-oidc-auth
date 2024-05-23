@@ -3,7 +3,6 @@ import { withQuery, parseURL, normalizeURL } from 'ufo'
 import { ofetch } from 'ofetch'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
-import { storageDriver } from '../utils/storage'
 import { validateConfig } from '../utils/config'
 import { generateRandomUrlSafeString, generatePkceVerifier, generatePkceCodeChallenge, decryptToken, parseJwtToken, encryptToken, validateToken, genBase64FromString } from '../utils/security'
 import { getUserSessionId, clearUserSession } from '../utils/session'

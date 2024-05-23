@@ -29,6 +29,7 @@ export const useOidcAuth = () => {
 
   async function login({provider, returnPath}: {provider?: ProviderKeys, returnPath?: string} = {}) {
     if(returnPath) {
+      
       const cookie = useCookie('login-return-path') as Ref<ReturnPath>
       cookie.value = { path: returnPath  }
     }

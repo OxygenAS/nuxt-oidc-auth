@@ -3,7 +3,6 @@ import { defu } from 'defu'
 import { createHooks } from 'hookable'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
 import { useRuntimeConfig, useStorage } from '#imports'
-import { storageDriver } from './storage'
 import { configMerger, refreshAccessToken, useOidcLogger } from './oidc'
 import { decryptToken, encryptToken, parseJwtToken } from './security'
 import * as providerPresets from '../../providers'
