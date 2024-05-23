@@ -79,13 +79,10 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
 
 export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>,  ) {
   const logger = useOidcLogger()
-  console.log('callback')
   
   return eventHandler(async (event: H3Event) => {
-    console.log('hej')
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
-
     const validationResult = validateConfig(config, config.requiredProperties)
 
     if (!validationResult.valid) {

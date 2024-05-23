@@ -127,11 +127,12 @@ export async function getUserSessionId(event) {
   return (await _useSession(event)).id;
 }
 export async function getAccessToken(event) {
-  await requireUserSession(event);
   const session = await _useSession(event);
   if (!session) {
     setTimeout(async () => {
+      await requireUserSession(event);
       const sessionId = await getUserSessionId(event);
+      console.log("set timeout");
       const persistentSession = await storageDriver().getItem(sessionId);
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
       return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
@@ -139,6 +140,7 @@ export async function getAccessToken(event) {
   } else {
     const persistentSession = await storageDriver().getItem(session?.id);
     const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+    await refreshUserSession(event);
     return persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
   }
 }

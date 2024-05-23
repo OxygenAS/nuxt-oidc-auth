@@ -12,7 +12,6 @@ export default callbackEventHandler({
     const returnPath = JSON.parse(getCookie(event, "login-return-path") || "{}");
     const pathString = returnPath?.path || "/";
     deleteCookie(event, "login-return-path");
-    console.log("callback-done");
     return sendRedirect(event, pathString);
   }
 });
