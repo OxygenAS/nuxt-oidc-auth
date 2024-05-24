@@ -66,7 +66,6 @@ export function loginEventHandler({ onError }) {
 export function callbackEventHandler({ onSuccess, onError }) {
   const logger = useOidcLogger();
   return eventHandler(async (event) => {
-    await clearUserSession(event);
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
     const validationResult = validateConfig(config, config.requiredProperties);
@@ -197,6 +196,11 @@ export function callbackEventHandler({ onSuccess, onError }) {
       };
     }
     console.log("after init persistent session", persistentSession);
+    try {
+      clearUserSession(event);
+    } catch (error2) {
+      console.log("error clearing user session", error2);
+    }
     return onSuccess(event, {
       user,
       persistentSession

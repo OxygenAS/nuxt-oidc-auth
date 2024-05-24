@@ -14,6 +14,7 @@ import type { OAuthConfig } from '../../types/config'
 import type { Tokens, UserSession } from '../../types/session'
 import type { AuthSession, AuthorizationRequest, OidcProviderConfig, PersistentSession, PkceAuthorizationRequest, ProviderKeys, TokenRequest, TokenRespose } from '../../types/oidc'
 import { subtle } from 'uncrypto'
+import { clear } from 'console'
 
 async function useAuthSession(event: H3Event) {
   const session = await useSession<AuthSession>(event, {
@@ -80,8 +81,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
   const logger = useOidcLogger()
 
   return eventHandler(async (event: H3Event) => {
-    await clearUserSession(event)
-
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
     const validationResult = validateConfig(config, config.requiredProperties)
@@ -254,8 +253,11 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     }
     console.log('after init persistent session', persistentSession)
-    // await session.clear()
-    // deleteCookie(event, 'oidc')
+    try {
+      clearUserSession(event)
+    }catch(error){
+      console.log('error clearing user session', error)
+    }
 
     return onSuccess(event, {
       user,
