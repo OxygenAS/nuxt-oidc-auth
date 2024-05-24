@@ -8,7 +8,6 @@ export const useOidcAuth = () => {
   });
   const currentProvider = computed(() => sessionState.value?.provider || void 0);
   async function fetch() {
-    console.log("fetching from composable");
     useSessionState().value = await useRequestFetch()("/api/_auth/session", {
       headers: {
         Accept: "text/json"
@@ -16,7 +15,6 @@ export const useOidcAuth = () => {
     }).catch(() => void 0);
   }
   async function refresh() {
-    console.log("refresh");
     await $fetch("/api/_auth/refresh", { method: "POST" });
     await fetch();
   }

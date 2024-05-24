@@ -14,7 +14,6 @@ export const useOidcAuth = () => {
   })
   const currentProvider: ComputedRef<ProviderKeys | undefined | 'dev'> = computed(() => sessionState.value?.provider || undefined)
   async function fetch() {
-    console.log('fetching from composable')
     useSessionState().value = (await useRequestFetch()('/api/_auth/session', {
       headers: {
         Accept: 'text/json'
@@ -24,7 +23,6 @@ export const useOidcAuth = () => {
   }
 
   async function refresh() {
-    console.log('refresh')
     await $fetch('/api/_auth/refresh', { method: 'POST' })
     await fetch()
   }

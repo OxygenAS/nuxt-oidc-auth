@@ -26,25 +26,19 @@ export async function clearUserSession(event) {
 }
 export async function refreshUserSession(event) {
   const session = await _useSession(event);
-  console.log("line 66", session.id);
   const persistentSession = await useStorage("oidc").getItem(session.id);
   if (!session.data.canRefresh || !persistentSession?.refreshToken) {
-    console.log("line 67");
     throw createError({
       statusCode: 500,
       message: "No refresh token"
     });
   }
-  console.log("line 74");
   await sessionHooks.callHookParallel("refresh", session.data, event);
-  console.log("line 76");
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
   const refreshToken = await decryptToken(persistentSession.refreshToken, tokenKey);
   const provider = session.data.provider;
   const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
-  console.log("line 84");
   const { user, tokens, expiresIn } = await refreshAccessToken(refreshToken, config);
-  console.log("line 86");
   const accessToken = parseJwtToken(tokens.accessToken, providerPresets[provider].skipAccessTokenParsing);
   const updatedPersistentSession = {
     exp: accessToken.exp || Math.trunc(Date.now() / 1e3) + Number.parseInt(expiresIn),
@@ -69,7 +63,6 @@ export async function requireUserSession(event) {
     });
   }
   const sessionId = session.id;
-  console.log("line 121", sessionId);
   const persistentSession = await useStorage("oidc").getItem(sessionId);
   if (config.exposeAccessToken) {
     if (persistentSession) {
@@ -94,34 +87,25 @@ export async function requireUserSession(event) {
     let expired = true;
     if (persistentSession) {
       expired = persistentSession?.exp <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
-      console.log("line 148", expired);
-      console.log("line 149", persistentSession?.exp, Math.trunc(Date.now() / 1e3));
     } else {
-      console.log("line 174 session not found");
       throw createError({
         statusCode: 401,
         message: "Session not found"
       });
     }
     if (expired) {
-      console.log("line 165", expired);
       logger.info("Session expired");
       if (sessionConfig.automaticRefresh) {
-        console.log("line 169 automatic refresh", userSession);
         await refreshUserSession(event);
-        console.log("line 172 usersession refreshed", userSession);
         return userSession;
       }
-      console.log("line 175 user session clearing");
       await clearUserSession(event);
-      console.log("line 177 user session cleared session expired");
       throw createError({
         statusCode: 401,
         message: "Session expired"
       });
     }
   }
-  console.log("line 184", userSession);
   return userSession;
 }
 export async function getUserSessionId(event) {
@@ -129,12 +113,11 @@ export async function getUserSessionId(event) {
 }
 export async function getAccessToken(event) {
   await requireUserSession(event);
-  const session = await _useSession(event);
-  const sessionId = session.id;
+  const sessionId = await getUserSessionId(event);
   const persistentSession = await useStorage("oidc").getItem(sessionId);
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
-  const accessToken = await decryptToken(persistentSession.accessToken, tokenKey) || null;
-  return accessToken;
+  const accessToken = await decryptToken(persistentSession.accessToken, tokenKey);
+  return accessToken || null;
 }
 function _useSession(event) {
   if (!sessionConfig) {

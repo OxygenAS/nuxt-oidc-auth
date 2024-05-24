@@ -196,7 +196,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     // Construct user object
-    console.log(accessToken.exp, 'access token expiration, callback')
     const timestamp = Math.trunc(Date.now() / 1000) // Use seconds instead of milliseconds to align with JWT
     const user: UserSession = {
       canRefresh: !!tokens.refreshToken,
@@ -241,7 +240,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     //   user.idToken = tokenResponse.id_token
     let persistentSession: PersistentSession | undefined
     if (tokenResponse.refresh_token) {
-      console.log('refresh token', tokenResponse.refresh_token)
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       persistentSession = {
         exp: accessToken.exp as number,
@@ -252,7 +250,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       }
 
     }
-    console.log('after init persistent session', persistentSession)
     try {
       clearUserSession(event)
     }catch(error){

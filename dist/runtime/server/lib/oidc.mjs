@@ -154,7 +154,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: parseJwtToken(tokenResponse.id_token) }
       };
     }
-    console.log(accessToken.exp, "access token expiration, callback");
     const timestamp = Math.trunc(Date.now() / 1e3);
     const user = {
       canRefresh: !!tokens.refreshToken,
@@ -185,7 +184,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
     }
     let persistentSession;
     if (tokenResponse.refresh_token) {
-      console.log("refresh token", tokenResponse.refresh_token);
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
       persistentSession = {
         exp: accessToken.exp,
@@ -195,7 +193,6 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) }
       };
     }
-    console.log("after init persistent session", persistentSession);
     try {
       clearUserSession(event);
     } catch (error2) {
