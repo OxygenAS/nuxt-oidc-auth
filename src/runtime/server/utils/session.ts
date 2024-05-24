@@ -191,7 +191,6 @@ export async function getUserSessionId(event: H3Event) {
 }
 export async function getAccessToken(event: H3Event) {
   await requireUserSession(event)
-  await refreshUserSession(event)
   const session = await _useSession(event)
   const sessionId = session.id
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
