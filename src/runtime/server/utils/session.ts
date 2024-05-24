@@ -160,7 +160,12 @@ export async function requireUserSession(event: H3Event) {
 
         return userSession
       }
-      await clearUserSession(event)
+      try {
+        // Clear session
+        await clearUserSession(event)
+      } catch (error) {
+        console.log('session already cleared')
+      }
       throw createError({
         statusCode: 401,
         message: 'Session expired'

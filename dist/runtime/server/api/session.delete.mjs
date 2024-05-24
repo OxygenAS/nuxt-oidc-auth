@@ -1,6 +1,10 @@
 import { eventHandler } from "h3";
 import { clearUserSession } from "../utils/session.mjs";
 export default eventHandler(async (event) => {
-  await clearUserSession(event);
+  try {
+    await clearUserSession(event);
+  } catch (error) {
+    console.log("session already cleared");
+  }
   return { loggedOut: true };
 });

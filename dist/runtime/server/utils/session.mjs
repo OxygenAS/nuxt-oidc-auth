@@ -99,7 +99,11 @@ export async function requireUserSession(event) {
         await refreshUserSession(event);
         return userSession;
       }
-      await clearUserSession(event);
+      try {
+        await clearUserSession(event);
+      } catch (error) {
+        console.log("session already cleared");
+      }
       throw createError({
         statusCode: 401,
         message: "Session expired"

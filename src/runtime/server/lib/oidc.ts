@@ -275,9 +275,14 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null
     }
+    try {
+      // Clear session
+      await clearUserSession(event)
+      
+    } catch (error) {
+      console.log('session already cleared')
+    }
 
-    // Clear session
-    await clearUserSession(event)
 
     if (config.logoutUrl) {
       return sendRedirect(
