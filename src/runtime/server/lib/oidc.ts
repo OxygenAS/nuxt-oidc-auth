@@ -14,7 +14,7 @@ import type { OAuthConfig } from '../../types/config'
 import type { Tokens, UserSession } from '../../types/session'
 import type { AuthSession, AuthorizationRequest, OidcProviderConfig, PersistentSession, PkceAuthorizationRequest, ProviderKeys, TokenRequest, TokenRespose } from '../../types/oidc'
 import { subtle } from 'uncrypto'
-import { clear } from 'console'
+
 
 async function useAuthSession(event: H3Event) {
   const session = await useSession<AuthSession>(event, {
@@ -284,11 +284,12 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     }
 
 
-    if (config.logoutUrl) {
+    if (config.logoutUrl) {   
+      
       return sendRedirect(
         event,
         withQuery(config.logoutUrl, {
-          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${getRequestURL(event).protocol}//${getRequestURL(event).host}` },
+          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${config.logoutRedirectURL ? config.logoutRedirectURL : getRequestURL(event).protocol}//${getRequestURL(event).host}` },
           ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken }
         }),
         200

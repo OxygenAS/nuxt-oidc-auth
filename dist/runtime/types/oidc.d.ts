@@ -126,6 +126,10 @@ export interface OidcProviderConfig {
      */
     logoutRedirectParameterName?: string;
     /**
+     * URL to redirect to after logout
+     */
+    logoutRedirectURL?: string;
+    /**
      * Additional parameters to be added to the authorization request
      */
     additionalAuthParameters?: Record<string, string>;
