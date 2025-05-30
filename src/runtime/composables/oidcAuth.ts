@@ -1,4 +1,4 @@
-import { useState, computed, useCookie, useRequestFetch, navigateTo, useRoute } from '#imports'
+import { useState, computed, useCookie, useRequestFetch, navigateTo } from '#imports'
 import type { Ref, ComputedRef } from '#imports'
 import type { ProviderKeys } from '../types/oidc'
 import type { UserSession, ReturnPath } from '../types/session'

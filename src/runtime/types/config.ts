@@ -1,5 +1,4 @@
 import type { H3Event, H3Error } from 'h3'
-import type { UserSession } from './session'
 import type { PersistentSession } from './oidc'
 
 export interface OAuthConfig<UserSession> {

@@ -221,14 +221,7 @@ export function logoutEventHandler({ onSuccess }) {
       console.log("session already cleared");
     }
     if (config.logoutUrl) {
-      return sendRedirect(
-        event,
-        withQuery(config.logoutUrl, {
-          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${config.logoutRedirectURL ? config.logoutRedirectURL : getRequestURL(event).protocol}//${getRequestURL(event).host}` },
-          ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken }
-        }),
-        200
-      );
+      console.log("logging out", `${config.logoutRedirectURL ? config.logoutRedirectURL : getRequestURL(event).protocol}//${getRequestURL(event).host}`);
     }
     return onSuccess(event, {
       user: void 0
