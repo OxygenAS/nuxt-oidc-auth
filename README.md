@@ -59,7 +59,7 @@ Derudover kræver det følgende variables:
 
 ```js
 # # AZURE STORAGE CONFIG
-# NUXT_SAS_KEY=/?{Blob SAS token}
+# NUXT_SAS_KEY={Blob SAS token}
 # NUXT_CONTAINER_NAME={blob container name}
 # NUXT_ACCOUNT_NAME={blob account name}
 ```
