@@ -29,3 +29,38 @@ Resten af config og dokumentation kan findes på
 https://github.com/itpropro/nuxt-oidc-auth
 
 Tilføjet: mulighed for setting return path ved login - login metoden fra composable tager nu et object {provider, returnPath} begge er optional
+
+På test og produktionsmiljøer, skal der opsættes end blob storage til opbevaring af access tokens.
+
+I FE projektet skal der oprettes et server side plugin, som skal således ud:
+
+```js
+// file: /server/plugins/storage.js
+
+import azureBlobDriver from "unstorage/drivers/azure-storage-blob";
+
+export default defineNitroPlugin(() => {
+  const storage = useStorage();
+  const driver = azureBlobDriver({
+    base: "oidc",
+    accountName: useRuntimeConfig().accountName,
+    sasKey: useRuntimeConfig().sasKey,
+    containerName: useRuntimeConfig().containerName,
+  });
+
+  // Mount driver
+  storage.mount("oidc", driver);
+});
+
+```
+Plugin'et er afhængigt af pakkerne @azure/identity og @azure/storage-blob.
+
+Derudover kræver det følgende variables:
+
+```js
+# # AZURE STORAGE CONFIG
+# NUXT_SAS_KEY=/?{Blob SAS token}
+# NUXT_CONTAINER_NAME={blob container name}
+# NUXT_ACCOUNT_NAME={blob account name}
+```
+Husk at give shared access key (SAS-key) de nødvendige rettigheder - datoudløb, samt write permissions.
