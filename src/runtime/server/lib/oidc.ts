@@ -21,6 +21,9 @@ async function useAuthSession(event: H3Event) {
     name: 'oidc',
     password: process.env.NUXT_OIDC_AUTH_SESSION_SECRET as string,
     maxAge: 300, // 5 minutes if for example registration takes place
+    cookie: {
+      httpOnly: false,
+    },
   })
   return session
 }

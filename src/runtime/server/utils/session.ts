@@ -190,7 +190,7 @@ export async function getAccessToken(event: H3Event) {
 function _useSession(event: H3Event) {
   if (!sessionConfig) {
     // @ts-ignore
-    sessionConfig = defu({ password: process.env.NUXT_OIDC_SESSION_SECRET, name: sessionName }, useRuntimeConfig(event).oidc.session)
+    sessionConfig = defu({ password: process.env.NUXT_OIDC_SESSION_SECRET, name: sessionName, cookie: {httpOnly: false} }, useRuntimeConfig(event).oidc.session)
   }
   return useSession<UserSession>(event, sessionConfig)
 }
