@@ -278,6 +278,11 @@ interface AuthSessionConfig {
          * @default process.env.NODE_ENV === 'production'
          */
         secure?: boolean | undefined;
+        /**
+         * Cookie httpOnly attribute - If true, the cookie will be inaccessible to JavaScript's Document.cookie API
+         * @default false
+         */
+        httpOnly?: boolean | undefined;
     };
 }
 

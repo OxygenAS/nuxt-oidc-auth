@@ -125,7 +125,7 @@ export async function getAccessToken(event) {
 }
 function _useSession(event) {
   if (!sessionConfig) {
-    sessionConfig = defu({ password: process.env.NUXT_OIDC_SESSION_SECRET, name: sessionName }, useRuntimeConfig(event).oidc.session);
+    sessionConfig = defu({ password: process.env.NUXT_OIDC_SESSION_SECRET, name: sessionName, cookie: { httpOnly: false } }, useRuntimeConfig(event).oidc.session);
   }
   return useSession(event, sessionConfig);
 }
