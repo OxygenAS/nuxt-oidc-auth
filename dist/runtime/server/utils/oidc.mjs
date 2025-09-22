@@ -100,7 +100,6 @@ export function oidcErrorHandler(event, errorText, onError, errorCode = 500) {
     statusCode: errorCode,
     message: errorText
   });
-  if (!onError)
-    throw h3Error;
+  if (!onError) throw h3Error;
   return onError(event, h3Error);
 }

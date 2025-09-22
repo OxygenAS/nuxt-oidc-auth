@@ -2,46 +2,45 @@ import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
   modules: [
-    'nuxt-oidc-auth',
-    '@unocss/nuxt',
-    '@nuxtjs/color-mode',
+    'nuxt-oidc-auth'
   ],
   features: {
     inlineStyles: false,
   },
   runtimeConfig: {
-    origin: 'http://localhost:3000',
-    public: {
-      origin: 'http://localhost:3000',
-      environment: 'development',
-      mediaEndpoint: 'https://localhost:44353',
-      it34MapUrl: 'https://testrealdaniamap.it34.com',
-      it34Endpoint: 'https://devrealdaniaapi.it34.com',
-
-    },
   },
   oidc: {
     defaultProvider: 'oidc',
     providers: {
       oidc: {
-        clientId: 'jubilaeum_website',
-        clientSecret: '59f293123c954ba7acc1e69a5d26ecaa',
+        clientId: 'realdania_umbraco',
+        clientSecret: '46b2fe1055e740bdb8dfe06e509cb425',
         responseType: 'code',
-        grantType: 'authorization_code',
-        scope: ['jubilaeum_website', 'realdania_application', 'openid', 'profile', 'offline_access', 'email'],
-        authorizationUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/authorize',
-        userinfoUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/userInfo',
+        authorizationUrl:
+          process.env.NUXT_OIDC_AUTHORITY + '/connect/authorize',
+        userInfoUrl: process.env.NUXT_OIDC_AUTHORITY + '/connect/userInfo',
         redirectUri: process.env.NUXT_PUBLIC_ORIGIN + '/auth/oidc/callback',
-        logoutUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/endsession',
-        tokenUrl: process.env.NUXT_OIDC_AUTORITY + '/connect/token',
+        grantType: 'authorization_code',
+        scope: [
+          'realdania_website',
+          'realdania_application',
+          'openid',
+          'profile',
+          'offline_access',
+          'membershipData',
+        ],
+        logoutUrl: process.env.NUXT_OIDC_AUTHORITY + '/connect/endsession',
         responseMode: 'query',
+        tokenUrl: process.env.NUXT_OIDC_AUTHORITY + '/connect/token',
         authenticationScheme: 'body',
         tokenRequestType: 'form-urlencoded',
-
+        exposeAccessToken: false,
         logoutRedirectParameterName: 'post_logout_redirect_uri',
         logoutIdTokenParameterName: 'id_token_hint',
+        logoutRedirectURL: process.env.NUXT_PUBLIC_ORIGIN,
         logoutIncludeIdToken: true,
-      }
+        exposeIdToken: false,
+      },
     },
     session: {
       expirationCheck: true,
@@ -52,24 +51,16 @@ export default defineNuxtConfig({
       customLoginPage: false,
     },
   },
-  colorMode: {
-    classSuffix: '',
-    preference: 'dark',
-  },
-  unocss: {
-    preflight: true,
-  },
-  devtools: { enabled: true },
   imports: {
     autoImport: true
   },
   nitro: {
     preset: 'node-server',
-    // storage: { // Local file system storage for demo purposes
-    //   oidc: {
-    //     driver: 'fs',
-    //     base: 'playground/oidcstorage'
-    //   }
-    // }
+     storage: { // Local file system storage for demo purposes
+       oidc: {
+         driver: 'fs',
+         base: 'playground/oidcstorage'
+       }
+     }
   },
 })

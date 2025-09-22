@@ -1,3 +1,4 @@
+import type { ComputedRef } from '#imports';
 import type { ProviderKeys } from '../types/oidc';
 import type { UserSession } from '../types/session';
 export declare const useOidcAuth: () => {
@@ -7,9 +8,9 @@ export declare const useOidcAuth: () => {
     fetch: () => Promise<void>;
     refresh: () => Promise<void>;
     login: ({ provider, returnPath }?: {
-        provider?: "auth0" | "entra" | "github" | "keycloak" | "oidc" | undefined;
-        returnPath?: string | undefined;
+        provider?: ProviderKeys;
+        returnPath?: string;
     }) => Promise<void>;
-    logout: (provider?: ProviderKeys | 'dev') => Promise<void>;
+    logout: (provider?: ProviderKeys | "dev") => Promise<void>;
     clear: () => Promise<void>;
 };

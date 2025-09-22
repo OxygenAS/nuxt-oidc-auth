@@ -30,8 +30,7 @@ export function loginEventHandler({ onError }) {
     if (!validationResult.valid) {
       logger.error(`[${provider}] Missing configuration properties:`, validationResult.missingProperties?.join(", "));
       const error = new H3Error("Invalid configuration");
-      if (!onError)
-        throw error;
+      if (!onError) throw error;
       return onError(event, error);
     }
     const session = await useAuthSession(event);
@@ -75,8 +74,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
     if (!validationResult.valid) {
       logger.error(`[${provider}] Missing configuration properties: `, validationResult.missingProperties?.join(", "));
       const error2 = new H3Error("Invalid configuration");
-      if (!onError)
-        throw error2;
+      if (!onError) throw error2;
       return onError(event, error2);
     }
     const session = await useAuthSession(event);

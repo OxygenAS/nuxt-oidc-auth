@@ -82,7 +82,7 @@ export declare function validateToken(token: string, options: ValidateAccessToke
 interface CodegenOptions {
     encoding?: 'utf8' | 'ascii' | 'url';
 }
-export declare function genBytesFromBase64(input: string): Uint8Array;
+export declare function genBytesFromBase64(input: string): Uint8Array<ArrayBuffer>;
 export declare function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean): string;
 export declare function genBase64FromString(input: string, options?: CodegenOptions): string;
 export declare function genStringFromBase64(input: string, options?: CodegenOptions): string;

@@ -65,7 +65,13 @@ declare const _PROVIDERS_github: typeof github;
 declare const _PROVIDERS_keycloak: typeof keycloak;
 declare const _PROVIDERS_oidc: typeof oidc;
 declare namespace _PROVIDERS {
-  export { _PROVIDERS_auth0 as auth0, _PROVIDERS_entra as entra, _PROVIDERS_github as github, _PROVIDERS_keycloak as keycloak, _PROVIDERS_oidc as oidc };
+  export {
+    _PROVIDERS_auth0 as auth0,
+    _PROVIDERS_entra as entra,
+    _PROVIDERS_github as github,
+    _PROVIDERS_keycloak as keycloak,
+    _PROVIDERS_oidc as oidc,
+  };
 }
 
 type ProviderKeys = keyof typeof _PROVIDERS;
@@ -397,6 +403,7 @@ declare module '@nuxt/schema' {
         oidc: ModuleOptions;
     }
 }
-declare const _default: _nuxt_schema.NuxtModule<ModuleOptions>;
+declare const _default: _nuxt_schema.NuxtModule<ModuleOptions, ModuleOptions, false>;
 
-export { type ClientFunctions, type DevModeConfig, type MiddlewareConfig, type ModuleOptions, type ServerFunctions, _default as default };
+export { _default as default };
+export type { ClientFunctions, DevModeConfig, MiddlewareConfig, ModuleOptions, ServerFunctions };

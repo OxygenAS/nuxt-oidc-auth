@@ -4,7 +4,7 @@ export declare function defineOidcProvider<TConfig, TRequired extends keyof Oidc
     additionalAuthParameters?: TConfig;
     additionalTokenParameters?: TConfig;
 }): MakePropertiesRequired<Partial<Partial<OidcProviderConfig> & {
-    additionalAuthParameters?: TConfig | undefined;
-    additionalTokenParameters?: TConfig | undefined;
+    additionalAuthParameters?: TConfig;
+    additionalTokenParameters?: TConfig;
 }>, TRequired>;
 export {};

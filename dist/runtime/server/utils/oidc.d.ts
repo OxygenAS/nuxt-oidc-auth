@@ -6,11 +6,11 @@ export declare const configMerger: <Source extends {
     [x: string]: any;
     [x: number]: any;
     [x: symbol]: any;
-}, Defaults extends ({
+}, Defaults extends Array<{
     [x: string]: any;
     [x: number]: any;
     [x: symbol]: any;
-} | (number | boolean | any[] | Record<never, any> | null | undefined))[]>(source: Source, ...defaults: Defaults) => import("defu").Defu<Source, Defaults>;
+} | (number | boolean | any[] | Record<never, any> | null | undefined)>>(source: Source, ...defaults: Defaults) => import("defu").Defu<Source, Defaults>;
 export declare function refreshAccessToken(refreshToken: string, config: OidcProviderConfig): Promise<{
     user: UserSession;
     tokens: Record<"refreshToken" | "accessToken" | "idToken", string>;

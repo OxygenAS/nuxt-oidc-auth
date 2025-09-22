@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const colorMode = useColorMode()
 </script>
 
 <template>
@@ -10,20 +9,7 @@ const colorMode = useColorMode()
       <p>
         Nuxt OIDC Auth
       </p>
-      <div class="absolute right-16 top-8 text-5">
-        <button
-          v-if="colorMode.preference === 'light'"
-          @click="colorMode.preference = 'dark'"
-        >
-          <span class="i-majesticons-sun" />
-        </button>
-        <button
-          v-else
-          @click="colorMode.preference = 'light'"
-        >
-          <span class="i-majesticons-moon" />
-        </button>
-      </div>
+    
     </div>
     <main
       class="flex-1 w-full overflow-y-auto p-4 dark:(from-brand-blue via-brand-blue to-brand-blueDark bg-gradient-to-tr) sm:px-8 sm:py-6"
