@@ -197,7 +197,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
       };
     }
     try {
-      clearUserSession(event);
+      await clearUserSession(event);
     } catch (error2) {
       console.log("error clearing user session", error2);
     }

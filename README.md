@@ -64,3 +64,5 @@ Derudover kræver det følgende variables:
 # NUXT_ACCOUNT_NAME={blob account name}
 ```
 Husk at give shared access key (SAS-key) de nødvendige rettigheder - datoudløb, samt write permissions.
+
+Hvis man forsøger at release og den giver nuxt-kit fejl, skal man køre dev:prepare

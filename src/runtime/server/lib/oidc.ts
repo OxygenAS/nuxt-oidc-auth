@@ -254,7 +254,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     }
     try {
-      clearUserSession(event)
+      await clearUserSession(event)
     }catch(error){
       console.log('error clearing user session', error)
     }
