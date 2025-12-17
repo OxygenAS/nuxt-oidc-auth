@@ -69,6 +69,7 @@ export function loginEventHandler({ onError }) {
 export function callbackEventHandler({ onSuccess, onError }) {
   const logger = useOidcLogger();
   return eventHandler(async (event) => {
+    logger.debug("Handling OIDC callback");
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
     const validationResult = validateConfig(config, config.requiredProperties);
@@ -201,9 +202,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
     } catch (error2) {
       console.log("error clearing user session", error2);
     }
-    await session.clear();
     deleteCookie(event, "oidc");
-    console.log("session cleared");
     return onSuccess(event, {
       user,
       persistentSession

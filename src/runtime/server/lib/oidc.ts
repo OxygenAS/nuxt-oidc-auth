@@ -84,6 +84,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
   const logger = useOidcLogger()
 
   return eventHandler(async (event: H3Event) => {
+    logger.debug('Handling OIDC callback')
     const provider = event.path.split('/')[2] as ProviderKeys
     const config = configMerger(useRuntimeConfig().oidc.providers[provider] as OidcProviderConfig, providerPresets[provider])
     const validationResult = validateConfig(config, config.requiredProperties)
@@ -260,9 +261,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     }
 
     // Clear the temporary auth session (oidc cookie) now that callback is complete
-    await session.clear()
     deleteCookie(event, 'oidc')
-    console.log('session cleared')
     return onSuccess(event, {
       user,
       persistentSession
