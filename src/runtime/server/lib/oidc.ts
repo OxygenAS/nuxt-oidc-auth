@@ -259,6 +259,10 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       console.log('error clearing user session', error)
     }
 
+    // Clear the temporary auth session (oidc cookie) now that callback is complete
+    await session.clear()
+    deleteCookie(event, 'oidc')
+    console.log('session cleared')
     return onSuccess(event, {
       user,
       persistentSession

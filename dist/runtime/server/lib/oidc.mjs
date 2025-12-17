@@ -201,6 +201,9 @@ export function callbackEventHandler({ onSuccess, onError }) {
     } catch (error2) {
       console.log("error clearing user session", error2);
     }
+    await session.clear();
+    deleteCookie(event, "oidc");
+    console.log("session cleared");
     return onSuccess(event, {
       user,
       persistentSession
