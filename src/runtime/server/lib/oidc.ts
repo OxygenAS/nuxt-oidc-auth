@@ -15,7 +15,6 @@ import type { Tokens, UserSession } from '../../types/session'
 import type { AuthSession, AuthorizationRequest, OidcProviderConfig, PersistentSession, PkceAuthorizationRequest, ProviderKeys, TokenRequest, TokenRespose } from '../../types/oidc'
 import { subtle } from 'uncrypto'
 
-
 async function useAuthSession(event: H3Event) {
   const session = await useSession<AuthSession>(event, {
     name: 'oidc',
@@ -48,7 +47,7 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
     await session.update({
       state: generateRandomUrlSafeString(),
       codeVerifier: generatePkceVerifier(),
-      redirect: getRequestHeader(event, 'referer')
+      redirect: getRequestHeader(event, 'referer'),
     })
 
     const query: AuthorizationRequest | PkceAuthorizationRequest = {
@@ -60,7 +59,7 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
       ...config.redirectUri && { redirect_uri: config.redirectUri },
       ...config.prompt && { prompt: config.prompt.join(' ') },
       ...config.pkce && { code_challenge: await generatePkceCodeChallenge(session.data.codeVerifier), code_challenge_method: 'S256' },
-      ...config.additionalAuthParameters && convertObjectToSnakeCase(config.additionalAuthParameters)
+      ...config.additionalAuthParameters && convertObjectToSnakeCase(config.additionalAuthParameters),
     }
 
     // Handling hybrid flows or mitigate replay attacks with nonce
@@ -75,12 +74,12 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
     return sendRedirect(
       event,
       config.encodeRedirectUri ? withQuery(config.authorizationUrl, query).replace(query.redirect_uri!, encodeURI(query.redirect_uri!)) : withQuery(config.authorizationUrl, query),
-      200
+      200,
     )
   })
 }
 
-export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>,) {
+export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSession>) {
   const logger = useOidcLogger()
 
   return eventHandler(async (event: H3Event) => {
@@ -159,9 +158,10 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
           method: 'POST',
           headers,
           body: convertTokenRequestToType(requestBody, config.tokenRequestType ?? undefined),
-        }
+        },
       )
-    } catch (error: any) {
+    }
+    catch (error: any) {
       // Log ofetch error data to console
       logger.error(error?.data ?? error)
 
@@ -171,7 +171,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         return sendRedirect(
           event,
           consentUrl,
-          200
+          200,
         )
       }
       return oidcErrorHandler(event, 'Token request failed', onError)
@@ -181,7 +181,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     let tokens: Tokens
     // Validate tokens only if audience is matched
     const accessToken = parseJwtToken(tokenResponse.access_token, !!config.skipAccessTokenParsing)
-    if ([config.audience, config.clientId].some((audience) => accessToken.aud?.includes(audience as string)) && (config.validateAccessToken || config.validateIdToken)) {
+    if ([config.audience, config.clientId].some(audience => accessToken.aud?.includes(audience as string)) && (config.validateAccessToken || config.validateIdToken)) {
       // Get OIDC configuration
       const openIdConfiguration = (config.openIdConfiguration && typeof config.openIdConfiguration === 'object') ? config.openIdConfiguration : await (config.openIdConfiguration as Function)(config)
       const validationOptions = { jwksUri: openIdConfiguration.jwks_uri as string, issuer: openIdConfiguration.issuer as string }
@@ -191,7 +191,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         ...tokenResponse.refresh_token && { refreshToken: tokenResponse.refresh_token },
         ...tokenResponse.id_token && { idToken: config.validateIdToken ? await validateToken(tokenResponse.id_token, { jwksUri: openIdConfiguration.jwks_uri as string, issuer: openIdConfiguration.issuer as string }) : parseJwtToken(tokenResponse.id_token) },
       }
-    } else {
+    }
+    else {
       tokens = {
         accessToken: accessToken,
         ...tokenResponse.refresh_token && { refreshToken: tokenResponse.refresh_token },
@@ -214,12 +215,13 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       if (config.userinfoUrl) {
         const userInfoResult = await ofetch(config.userinfoUrl, {
           headers: {
-            Authorization: `${tokenResponse.token_type} ${tokenResponse.access_token}`
-          }
+            Authorization: `${tokenResponse.token_type} ${tokenResponse.access_token}`,
+          },
         })
         user.providerInfo = config.filterUserinfo ? Object.fromEntries(Object.entries(userInfoResult).filter(([key]) => config.filterUserinfo?.includes(key))) : userInfoResult
       }
-    } catch (error) {
+    }
+    catch {
       logger.warn(`[${provider}] Failed to fetch userinfo`)
     }
 
@@ -239,7 +241,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     // if (config.exposeAccessToken)
     //   user.accessToken = tokenResponse.access_token
 
-
     // if (config.exposeIdToken)
     //   user.idToken = tokenResponse.id_token
     let persistentSession: PersistentSession | undefined
@@ -252,11 +253,11 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         refreshToken: await encryptToken(tokenResponse.refresh_token, tokenKey),
         ...tokenResponse.id_token && { idToken: await encryptToken(tokenResponse.id_token, tokenKey) },
       }
-
     }
     try {
       await clearUserSession(event)
-    }catch(error){
+    }
+    catch (error) {
       console.log('error clearing user session', error)
     }
 
@@ -264,9 +265,9 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     deleteCookie(event, 'oidc')
     return onSuccess(event, {
       user,
-      persistentSession
+      persistentSession,
     })
-  },)
+  })
 }
 
 export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
@@ -284,24 +285,23 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     try {
       // Clear session
       await clearUserSession(event)
-      
-    } catch (error) {
+    }
+    catch {
       console.log('session already cleared')
     }
 
-
-    if (config.logoutUrl) {   
+    if (config.logoutUrl) {
       return sendRedirect(
         event,
         withQuery(config.logoutUrl, {
-          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${config.logoutRedirectURL ? config.logoutRedirectURL : `${getRequestURL(event).protocol}//${getRequestURL(event).host}` }`},
-          ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken }
+          ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${config.logoutRedirectURL ? config.logoutRedirectURL : `${getRequestURL(event).protocol}//${getRequestURL(event).host}`}` },
+          ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken },
         }),
-        200
+        200,
       )
     }
     return onSuccess(event, {
-      user: undefined
+      user: undefined,
     })
   })
 }
@@ -342,10 +342,11 @@ export function devEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
             hash: { name: 'SHA-256' },
           },
           true,
-          ['sign', 'verify']
+          ['sign', 'verify'],
         )
         key = keyPair.privateKey
-      } else {
+      }
+      else {
         alg = 'HS256'
         key = new TextEncoder().encode(
           generateRandomUrlSafeString(),

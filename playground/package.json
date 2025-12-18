@@ -9,14 +9,14 @@
     "generate": "nuxi generate"
   },
   "dependencies": {
-    "nuxt": "^3.11.1",
-    "vue": "^3.4.21"
+    "nuxt": "^3.19.2",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@iconify-json/majesticons": "^1.1.11",
-    "@iconify-json/simple-icons": "^1.1.97",
-    "@nuxtjs/color-mode": "^3.3.3",
-    "@unocss/nuxt": "^0.58.6",
+    "@iconify-json/majesticons": "^1.2.3",
+    "@iconify-json/simple-icons": "^1.2.18",
+    "@nuxtjs/color-mode": "^3.5.2",
+    "@unocss/nuxt": "^0.64.1",
     "nuxt-oidc-auth": "latest"
   }
 }

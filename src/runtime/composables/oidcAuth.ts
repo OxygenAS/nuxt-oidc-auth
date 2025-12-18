@@ -16,10 +16,9 @@ export const useOidcAuth = () => {
   async function fetch() {
     useSessionState().value = (await useRequestFetch()('/api/_auth/session', {
       headers: {
-        Accept: 'text/json'
-      }
+        Accept: 'text/json',
+      },
     }).catch(() => (undefined)) as UserSession)
-    
   }
 
   async function refresh() {
@@ -40,19 +39,19 @@ export const useOidcAuth = () => {
       `/auth${provider ? '/' + provider : ''}/logout`,
       {
         external: true,
-      }
+      },
     )
   }
 
   /**
-  * Clears the current user session. Mainly for debugging, in production, always use the `logout` function, which completely cleans the state.
-  */
+   * Clears the current user session. Mainly for debugging, in production, always use the `logout` function, which completely cleans the state.
+   */
   async function clear() {
     await useRequestFetch()('/api/_auth/session', {
       method: 'DELETE',
       headers: {
-        Accept: 'text/json'
-      }
+        Accept: 'text/json',
+      },
     })
   }
 

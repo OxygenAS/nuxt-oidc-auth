@@ -5,8 +5,8 @@ import type * as _PROVIDERS from '../providers'
 export type ProviderKeys = keyof typeof _PROVIDERS
 export type ProviderConfigs = typeof _PROVIDERS
 
-type PossibleCombinations<T extends string, U extends string = T> =
-  T extends any ? (T | `${T} ${PossibleCombinations<Exclude<U, T>>}`) : never
+type PossibleCombinations<T extends string, U extends string = T>
+  = T extends any ? (T | `${T} ${PossibleCombinations<Exclude<U, T>>}`) : never
 
 export interface OidcProviderConfig {
   /**

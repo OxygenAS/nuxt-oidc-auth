@@ -1,16 +1,16 @@
 import type { H3Event, H3Error } from 'h3';
-import type { OidcProviderConfig, RefreshTokenRequest, TokenRequest } from '../../types/oidc';
-import type { UserSession } from '../../types/session';
+import type { OidcProviderConfig, RefreshTokenRequest, TokenRequest } from '../../types/oidc.js';
+import type { UserSession } from '../../types/session.js';
 export declare const useOidcLogger: () => import("consola").ConsolaInstance;
 export declare const configMerger: <Source extends {
     [x: string]: any;
     [x: number]: any;
     [x: symbol]: any;
-}, Defaults extends ({
+}, Defaults extends Array<{
     [x: string]: any;
     [x: number]: any;
     [x: symbol]: any;
-} | (number | boolean | any[] | Record<never, any> | null | undefined))[]>(source: Source, ...defaults: Defaults) => import("defu").Defu<Source, Defaults>;
+} | (number | boolean | any[] | Record<never, any> | null | undefined)>>(source: Source, ...defaults: Defaults) => import("defu").Defu<Source, Defaults>;
 export declare function refreshAccessToken(refreshToken: string, config: OidcProviderConfig): Promise<{
     user: UserSession;
     tokens: Record<"refreshToken" | "accessToken" | "idToken", string>;

@@ -1,2 +1,2 @@
-declare const _default: any;
+declare const _default: import("nuxt/app").RouteMiddleware;
 export default _default;

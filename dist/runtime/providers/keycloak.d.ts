@@ -1,4 +1,4 @@
-import type { OidcProviderConfig } from '../types/oidc';
+import type { OidcProviderConfig } from '../types/oidc.js';
 type KeycloakRequiredFields = 'baseUrl' | 'clientId' | 'clientSecret' | 'redirectUri';
 interface KeycloakProviderConfig {
     realm?: string;

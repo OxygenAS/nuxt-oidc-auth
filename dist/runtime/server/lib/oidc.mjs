@@ -30,8 +30,7 @@ export function loginEventHandler({ onError }) {
     if (!validationResult.valid) {
       logger.error(`[${provider}] Missing configuration properties:`, validationResult.missingProperties?.join(", "));
       const error = new H3Error("Invalid configuration");
-      if (!onError)
-        throw error;
+      if (!onError) throw error;
       return onError(event, error);
     }
     const session = await useAuthSession(event);
@@ -76,8 +75,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
     if (!validationResult.valid) {
       logger.error(`[${provider}] Missing configuration properties: `, validationResult.missingProperties?.join(", "));
       const error2 = new H3Error("Invalid configuration");
-      if (!onError)
-        throw error2;
+      if (!onError) throw error2;
       return onError(event, error2);
     }
     const session = await useAuthSession(event);
@@ -175,7 +173,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
         });
         user.providerInfo = config.filterUserinfo ? Object.fromEntries(Object.entries(userInfoResult).filter(([key]) => config.filterUserinfo?.includes(key))) : userInfoResult;
       }
-    } catch (error2) {
+    } catch {
       logger.warn(`[${provider}] Failed to fetch userinfo`);
     }
     if (config.userNameClaim) {
@@ -222,7 +220,7 @@ export function logoutEventHandler({ onSuccess }) {
     }
     try {
       await clearUserSession(event);
-    } catch (error) {
+    } catch {
       console.log("session already cleared");
     }
     if (config.logoutUrl) {

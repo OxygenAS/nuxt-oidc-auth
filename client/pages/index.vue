@@ -30,7 +30,7 @@ onDevtoolsClientConnected(async (client: NuxtDevtoolsIframeClient) => {
   oidcSecrets.value = isDevAuthed.value ? await devtoolsClient.value.devtools.extendClientRpc('nuxt-oidc-auth-rpc').getNuxtOidcAuthSecrets() : {}
 })
 
-async function login({provider}: {provider?: string} = {}) {
+async function login({ provider}: { provider?: string } = {}) {
   clientWindow.value.navigate(`/auth${provider ? '/' + provider : ''}/login`, true)
 }
 

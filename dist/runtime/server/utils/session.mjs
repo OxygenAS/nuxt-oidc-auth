@@ -101,7 +101,7 @@ export async function requireUserSession(event) {
       }
       try {
         await clearUserSession(event);
-      } catch (error) {
+      } catch {
         console.log("session already cleared");
       }
       throw createError({

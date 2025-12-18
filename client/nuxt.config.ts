@@ -1,18 +1,18 @@
 import { resolve } from 'pathe'
 
 export default defineNuxtConfig({
-  ssr: false,
+
   modules: [
-    '@nuxt/devtools-ui-kit'
-  ],
-  nitro: {
-    output: {
-      publicDir: resolve(__dirname, '../dist/client')
-    },
-    
-  },
+    '@nuxt/devtools-ui-kit',
+  ], ssr: false,
   app: {
     baseURL: '/__nuxt-oidc-auth',
+  },
+  nitro: {
+    output: {
+      publicDir: resolve(__dirname, '../dist/client'),
+    },
+
   },
   unocss: {
     shortcuts: {
@@ -23,6 +23,6 @@ export default defineNuxtConfig({
       'text-secondary': 'color-black/50 dark:color-white/50',
       // Reusable
       'x-divider': 'h-1px w-full bg-gray/15',
-    }
-  }
+    },
+  },
 })

@@ -1,6 +1,6 @@
 import type { SearchParameters } from 'ofetch';
-import type { EncryptedToken } from '../server/utils/security';
-import type * as _PROVIDERS from '../providers';
+import type { EncryptedToken } from '../server/utils/security.js';
+import type * as _PROVIDERS from '../providers/index.js';
 export type ProviderKeys = keyof typeof _PROVIDERS;
 export type ProviderConfigs = typeof _PROVIDERS;
 type PossibleCombinations<T extends string, U extends string = T> = T extends any ? (T | `${T} ${PossibleCombinations<Exclude<U, T>>}`) : never;

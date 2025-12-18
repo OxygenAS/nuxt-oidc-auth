@@ -38,7 +38,7 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
     refresh_token: refreshToken,
     grant_type: 'refresh_token',
     ...(config.scopeInTokenRequest && config.scope) && { scope: config.scope.join(' ') },
-    ...(config.authenticationScheme === 'body') && { client_secret: normalizeURL(config.clientSecret) }
+    ...(config.authenticationScheme === 'body') && { client_secret: normalizeURL(config.clientSecret) },
   }
   // Make refresh token request
   let tokenResponse: TokenRespose
@@ -48,10 +48,11 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
       {
         method: 'POST',
         headers,
-        body: convertTokenRequestToType(requestBody, config.tokenRequestType)
-      }
+        body: convertTokenRequestToType(requestBody, config.tokenRequestType),
+      },
     )
-  } catch (error: any) {
+  }
+  catch (error: any) {
     logger.error(error?.data ?? error) // Log ofetch error data to console
     throw new Error('Failed to refresh token')
   }
@@ -60,7 +61,7 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
   const tokens: Record<'refreshToken' | 'accessToken' | 'idToken', string> = {
     refreshToken: tokenResponse.refresh_token as string,
     accessToken: tokenResponse.access_token,
-    idToken: tokenResponse.id_token ? tokenResponse.id_token : undefined as any
+    idToken: tokenResponse.id_token ? tokenResponse.id_token : undefined as any,
   }
 
   // Construct user object
@@ -94,7 +95,7 @@ export async function refreshAccessToken(refreshToken: string, config: OidcProvi
 export function generateFormDataRequest(requestValues: RefreshTokenRequest | TokenRequest) {
   const requestBody = new FormData()
   Object.keys(requestValues).forEach((key) => {
-    requestBody.append(key, normalizeURL(requestValues[(key as keyof typeof requestValues)] as string))
+    requestBody.append(key, normalizeURL(requestValues[key as keyof typeof requestValues] as string))
   })
   return requestBody
 }

@@ -5,10 +5,10 @@ export default eventHandler(async (event) => {
   try {
     // Clear session
     await clearUserSession(event)
-    
-  } catch (error) {
+  }
+  catch {
     console.log('session already cleared')
   }
-  
+
   return { loggedOut: true }
 })

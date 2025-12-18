@@ -63,7 +63,7 @@ async function encryptMessage(text: string, key: CryptoKey, iv: Uint8Array) {
       iv,
     },
     key,
-    encoded
+    encoded,
   )
   return genBase64FromBytes(new Uint8Array(ciphertext))
 }
@@ -130,7 +130,7 @@ export async function encryptToken(token: string, key: string): Promise<Encrypte
   // TODO: Replace Buffer
   const secretKey = await subtle.importKey('raw', Buffer.from(key, 'base64'), {
     name: 'AES-GCM',
-    length: 256
+    length: 256,
   }, true, ['encrypt', 'decrypt'])
   const iv = getRandomValues(new Uint8Array(12))
   const encryptedToken = await encryptMessage(token, secretKey, iv)
@@ -151,7 +151,7 @@ export async function decryptToken(input: EncryptedToken, key: string): Promise<
   // TODO: Replace Buffer
   const secretKey = await subtle.importKey('raw', Buffer.from(key, 'base64'), {
     name: 'AES-GCM',
-    length: 256
+    length: 256,
   }, true, ['encrypt', 'decrypt'])
   const decrypted = await decryptMessage(encryptedToken, secretKey, genBytesFromBase64(iv))
   return new TextDecoder().decode(decrypted)
@@ -198,7 +198,7 @@ interface CodegenOptions {
 export function genBytesFromBase64(input: string) {
   return Uint8Array.from(
     globalThis.atob(input),
-    (c) => c.codePointAt(0) as number
+    c => c.codePointAt(0) as number,
   )
 }
 
@@ -213,10 +213,9 @@ export function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {
   return globalThis.btoa(String.fromCodePoint(...input))
 }
 
-
 export function genBase64FromString(
   input: string,
-  options: CodegenOptions = {}
+  options: CodegenOptions = {},
 ) {
   if (options.encoding === 'utf8') {
     return genBase64FromBytes(new TextEncoder().encode(input))
@@ -232,7 +231,7 @@ export function genBase64FromString(
 
 export function genStringFromBase64(
   input: string,
-  options: CodegenOptions = {}
+  options: CodegenOptions = {},
 ) {
   if (options.encoding === 'utf8') {
     return new TextDecoder().decode(genBytesFromBase64(input))
@@ -242,7 +241,8 @@ export function genStringFromBase64(
     const paddingLength = input.length % 4
     if (paddingLength === 2) {
       input += '=='
-    } else if (paddingLength === 3) {
+    }
+    else if (paddingLength === 3) {
       input += '='
     }
     return new TextDecoder().decode(genBytesFromBase64(input))

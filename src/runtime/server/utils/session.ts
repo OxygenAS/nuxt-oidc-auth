@@ -6,8 +6,8 @@ import { useRuntimeConfig, useStorage } from '#imports'
 import { configMerger, refreshAccessToken, useOidcLogger } from './oidc'
 import { decryptToken, encryptToken, parseJwtToken } from './security'
 import * as providerPresets from '../../providers'
-import type { H3Event } from 'h3'
-import type { SessionConfig } from 'h3'
+import type { H3Event, SessionConfig } from 'h3'
+
 import type { AuthSessionConfig, UserSession } from '../../types/session'
 import type { OidcProviderConfig, PersistentSession, ProviderKeys } from '../../types/oidc'
 
@@ -18,15 +18,15 @@ export interface SessionHooks {
   /**
    * Called when fetching the session from the API
    */
-  'fetch': (session: UserSession, event: H3Event) => void | Promise<void>
+  fetch: (session: UserSession, event: H3Event) => void | Promise<void>
   /**
    * Called before clearing the session
    */
-  'clear': (session: UserSession, event: H3Event) => void | Promise<void>
+  clear: (session: UserSession, event: H3Event) => void | Promise<void>
   /**
    * Called before refreshing the session
    */
-  'refresh': (session: UserSession, event: H3Event) => void | Promise<void>
+  refresh: (session: UserSession, event: H3Event) => void | Promise<void>
 }
 
 export const sessionHooks = createHooks<SessionHooks>()
@@ -44,12 +44,11 @@ export async function setUserSession(event: H3Event, data: UserSession) {
   const session = await _useSession(event)
 
   await session.update(defu(data, session.data))
-  
+
   return session.data
 }
 
 export async function clearUserSession(event: H3Event) {
-
   const session = await _useSession(event)
 
   await sessionHooks.callHookParallel('clear', session.data, event)
@@ -69,7 +68,7 @@ export async function refreshUserSession(event: H3Event) {
     // TODO - maybe login again?
     throw createError({
       statusCode: 500,
-      message: 'No refresh token'
+      message: 'No refresh token',
     })
   }
   await sessionHooks.callHookParallel('refresh', session.data, event)
@@ -90,7 +89,7 @@ export async function refreshUserSession(event: H3Event) {
     iat: accessToken.iat || Math.trunc(Date.now() / 1000),
     accessToken: await encryptToken(tokens.accessToken, tokenKey),
     refreshToken: await encryptToken(tokens.refreshToken, tokenKey),
-    idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : undefined as any
+    idToken: tokens?.idToken ? await encryptToken(tokens.idToken, tokenKey) : undefined as any,
   }
 
   await useStorage('oidc').setItem<PersistentSession>(session.id as string, updatedPersistentSession)
@@ -108,7 +107,7 @@ export async function requireUserSession(event: H3Event) {
   if (Object.keys(userSession).length === 0) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
@@ -120,17 +119,17 @@ export async function requireUserSession(event: H3Event) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       userSession.accessToken = await decryptToken(persistentSession.accessToken, tokenKey)
-
-    } else {
+    }
+    else {
       logger.warn('Persistent user session not found')
     }
   }
   if (config.exposeIdToken) {
-
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
       userSession.idToken = await decryptToken(persistentSession.idToken, tokenKey)
-    } else {
+    }
+    else {
       logger.warn('Persistent user session not found')
     }
   }
@@ -146,10 +145,9 @@ export async function requireUserSession(event: H3Event) {
       expired = persistentSession?.exp <= (Math.trunc(Date.now() / 1000) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === 'number' ? sessionConfig.expirationThreshold : 0))
     }
     else {
-
       throw createError({
         statusCode: 401,
-        message: 'Session not found'
+        message: 'Session not found',
       })
     }
     if (expired) {
@@ -163,12 +161,13 @@ export async function requireUserSession(event: H3Event) {
       try {
         // Clear session
         await clearUserSession(event)
-      } catch (error) {
+      }
+      catch {
         console.log('session already cleared')
       }
       throw createError({
         statusCode: 401,
-        message: 'Session expired'
+        message: 'Session expired',
       })
     }
   }
@@ -183,14 +182,14 @@ export async function getAccessToken(event: H3Event) {
   const sessionId = await getUserSessionId(event)
   const persistentSession = await useStorage('oidc').getItem<PersistentSession>(sessionId as string) as PersistentSession | null
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
-  const accessToken = await decryptToken(persistentSession.accessToken, tokenKey) 
+  const accessToken = await decryptToken(persistentSession.accessToken, tokenKey)
   return accessToken || null
 }
 
 function _useSession(event: H3Event) {
   if (!sessionConfig) {
-    // @ts-ignore
-    sessionConfig = defu({ password: process.env.NUXT_OIDC_SESSION_SECRET, name: sessionName, cookie: {httpOnly: false} }, useRuntimeConfig(event).oidc.session)
+    // @ts-ignore - useRuntimeConfig missing types
+    sessionConfig = defu({ password: process.env.NUXT_OIDC_SESSION_SECRET, name: sessionName, cookie: { httpOnly: false } }, useRuntimeConfig(event).oidc.session)
   }
   return useSession<UserSession>(event, sessionConfig)
 }

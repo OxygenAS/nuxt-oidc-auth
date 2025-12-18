@@ -1,2 +1,2 @@
-declare const _default: import("h3").EventHandler<import("h3").EventHandlerRequest, Promise<import("../../types/session").UserSession>>;
+declare const _default: import("h3").EventHandler<import("h3").EventHandlerRequest, Promise<import("../../types/session.js").UserSession>>;
 export default _default;

@@ -5,5 +5,9 @@
     "nuxt": "^3.9.0",
     "bridge": false
   },
-  "version": "0.12.6"
+  "version": "0.12.7",
+  "builder": {
+    "@nuxt/module-builder": "1.0.2",
+    "unbuild": "3.6.1"
+  }
 }

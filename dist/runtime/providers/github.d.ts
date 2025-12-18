@@ -1,4 +1,4 @@
-import type { OidcProviderConfig } from '../types/oidc';
+import type { OidcProviderConfig } from '../types/oidc.js';
 type GithubRequiredFields = 'clientId' | 'clientSecret' | 'redirectUri';
 export declare const github: Partial<Partial<OidcProviderConfig> & {
     additionalAuthParameters?: OidcProviderConfig | undefined;

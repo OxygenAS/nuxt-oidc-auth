@@ -1,177 +1,9 @@
 import { createResolver, defineNuxtModule, useLogger, addImportsDir, addPlugin, addServerPlugin, addServerHandler, extendRouteRules, addRouteMiddleware } from '@nuxt/kit';
-import { createDefu, defu } from 'defu';
-import { ofetch } from 'ofetch';
-import { normalizeURL, withoutTrailingSlash, withHttps, parseURL, cleanDoubleSlashes, joinURL } from 'ufo';
-import { existsSync } from 'fs';
+import { defu } from 'defu';
+import * as providerPresets from '../dist/runtime/providers/index.mjs';
+import { generateProviderUrl } from '../dist/runtime/server/utils/config.mjs';
+import { existsSync } from 'node:fs';
 import { onDevToolsInitialized, extendServerRpc } from '@nuxt/devtools-kit';
-
-const configMerger = createDefu((obj, key, value) => {
-  if (Array.isArray(obj[key]) && Array.isArray(value)) {
-    obj[key] = key === "requiredProperties" ? Array.from(new Set(obj[key].concat(value))) : value;
-    return true;
-  }
-});
-function defineOidcProvider(config = {}) {
-  const defaults = {
-    clientId: "",
-    redirectUri: "",
-    clientSecret: "",
-    authorizationUrl: "",
-    tokenUrl: "",
-    responseType: "code",
-    authenticationScheme: "header",
-    logoutIdTokenParameterName: "id_token_hint",
-    logoutIncludeIdToken: false,
-    grantType: "authorization_code",
-    pkce: false,
-    state: true,
-    nonce: false,
-    scope: ["openid"],
-    scopeInTokenRequest: false,
-    tokenRequestType: "form",
-    requiredProperties: [
-      "clientId",
-      "redirectUri",
-      "clientSecret",
-      "authorizationUrl",
-      "tokenUrl"
-    ],
-    validateAccessToken: true,
-    validateIdToken: true,
-    exposeAccessToken: false,
-    exposeIdToken: false
-  };
-  const mergedConfig = configMerger(config, defaults);
-  return mergedConfig;
-}
-
-const auth0 = defineOidcProvider({
-  responseType: "code",
-  tokenRequestType: "json",
-  authenticationScheme: "body",
-  userinfoUrl: "userinfo",
-  grantType: "authorization_code",
-  scope: ["openid"],
-  pkce: true,
-  state: true,
-  nonce: false,
-  scopeInTokenRequest: false,
-  userNameClaim: "",
-  authorizationUrl: "authorize",
-  tokenUrl: "oauth/token",
-  logoutUrl: "",
-  requiredProperties: [
-    "baseUrl",
-    "clientId",
-    "clientSecret",
-    "authorizationUrl",
-    "tokenUrl"
-  ],
-  async openIdConfiguration(config) {
-    const baseUrl = normalizeURL(withoutTrailingSlash(withHttps(config.baseUrl)));
-    return await ofetch(`${baseUrl}/.well-known/openid-configuration`);
-  },
-  validateAccessToken: true,
-  validateIdToken: false
-});
-
-const entra = defineOidcProvider({
-  tokenRequestType: "form-urlencoded",
-  responseType: "code",
-  authenticationScheme: "header",
-  logoutRedirectParameterName: "post_logout_redirect_uri",
-  grantType: "authorization_code",
-  scope: ["openid"],
-  pkce: true,
-  state: true,
-  nonce: false,
-  scopeInTokenRequest: false,
-  requiredProperties: [
-    "clientId",
-    "clientSecret",
-    "authorizationUrl",
-    "tokenUrl",
-    "redirectUri"
-  ],
-  async openIdConfiguration(config) {
-    const parsedUrl = parseURL(config.authorizationUrl);
-    const tenantId = parsedUrl.pathname.split("/")[1];
-    const openIdConfig = await ofetch(`https://${parsedUrl.host}/${tenantId}/.well-known/openid-configuration${config.audience && `?appid=${config.audience}`}`);
-    openIdConfig.issuer = [`https://${parsedUrl.host}/${tenantId}/v2.0`, openIdConfig.issuer];
-    return openIdConfig;
-  },
-  validateAccessToken: false,
-  validateIdToken: true
-});
-
-const github = defineOidcProvider({
-  authorizationUrl: "https://github.com/login/oauth/authorize",
-  tokenUrl: "https://github.com/login/oauth/access_token",
-  userinfoUrl: "https://api.github.com/user",
-  tokenRequestType: "json",
-  responseType: "code",
-  authenticationScheme: "body",
-  grantType: "authorization_code",
-  scope: ["user:email"],
-  pkce: false,
-  state: true,
-  nonce: false,
-  scopeInTokenRequest: false,
-  skipAccessTokenParsing: true,
-  requiredProperties: [
-    "clientId",
-    "clientSecret",
-    "authorizationUrl",
-    "tokenUrl",
-    "redirectUri"
-  ],
-  validateAccessToken: false,
-  validateIdToken: false
-});
-
-function generateProviderUrl(baseUrl, relativeUrl) {
-  const parsedUrl = parseURL(baseUrl);
-  return parsedUrl.protocol ? withoutTrailingSlash(cleanDoubleSlashes(joinURL(baseUrl, "/", relativeUrl || ""))) : withoutTrailingSlash(cleanDoubleSlashes(withHttps(joinURL(baseUrl, "/", relativeUrl || ""))));
-}
-
-const keycloak = defineOidcProvider({
-  authorizationUrl: "protocol/openid-connect/auth",
-  tokenUrl: "protocol/openid-connect/token",
-  userinfoUrl: "protocol/openid-connect/userinfo",
-  tokenRequestType: "form-urlencoded",
-  responseType: "code",
-  authenticationScheme: "header",
-  grantType: "authorization_code",
-  pkce: true,
-  state: false,
-  nonce: true,
-  scopeInTokenRequest: false,
-  skipAccessTokenParsing: false,
-  requiredProperties: [
-    "clientId",
-    "clientSecret",
-    "authorizationUrl",
-    "tokenUrl",
-    "redirectUri"
-  ],
-  validateAccessToken: true,
-  validateIdToken: false,
-  async openIdConfiguration(config) {
-    const configUrl = generateProviderUrl(config.baseUrl, ".well-known/openid-configuration");
-    return await ofetch(configUrl);
-  }
-});
-
-const oidc = defineOidcProvider();
-
-const providerPresets = {
-  __proto__: null,
-  auth0: auth0,
-  entra: entra,
-  github: github,
-  keycloak: keycloak,
-  oidc: oidc
-};
 
 const DEVTOOLS_UI_ROUTE = "/__nuxt-oidc-auth";
 const DEVTOOLS_UI_LOCAL_PORT = 3300;
@@ -213,7 +45,7 @@ function setupDevToolsUI(nuxt, resolver) {
 
 const RPC_NAMESPACE = "nuxt-oidc-auth-rpc";
 const { resolve } = createResolver(import.meta.url);
-const module = defineNuxtModule({
+const module$1 = defineNuxtModule({
   meta: {
     name: "nuxt-oidc-auth",
     configKey: "oidc",
@@ -385,4 +217,4 @@ const module = defineNuxtModule({
   }
 });
 
-export { module as default };
+export { module$1 as default };

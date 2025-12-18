@@ -1,4 +1,4 @@
-import type { OidcProviderConfig } from '../types/oidc';
+import type { OidcProviderConfig } from '../types/oidc.js';
 interface Auth0ProviderConfig {
     connection?: string;
     organization?: string;

@@ -4,5 +4,5 @@ import { sendRedirect } from 'h3'
 export default loginEventHandler({
   async onSuccess(event) {
     return sendRedirect(event, '/')
-  }
+  },
 })

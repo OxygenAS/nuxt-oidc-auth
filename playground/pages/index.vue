@@ -4,7 +4,7 @@
 const { loggedIn, user, refresh, login, logout, currentProvider, clear } = useOidcAuth()
 const { providers } = useProviders(currentProvider.value as string)
 // const counter = ref(0)
-// const checkAccessToken = async () => {return 
+// const checkAccessToken = async () => {return
 // await $fetch('/api/getAccessToken', { method: 'Get' })
 // }
 //   await checkAccessToken()
@@ -19,7 +19,7 @@ const { providers } = useProviders(currentProvider.value as string)
 //     console.log('counter', counter.value, loggedIn.value)
 //     checkAccessToken()
 //   }, 1000*60*10)
-  // })
+// })
 </script>
 
 <template>
@@ -33,7 +33,7 @@ const { providers } = useProviders(currentProvider.value as string)
       </p>
       <button
         class="btn-base btn-login"
-        @click="login({ returnPath: '/test'})"
+        @click="login({ returnPath: '/test' })"
       >
         <span class="i-majesticons-login-line" />
         <span class="pl-2">Default provider</span>
@@ -43,7 +43,7 @@ const { providers } = useProviders(currentProvider.value as string)
         :key="index"
         class="btn-base btn-login"
         :disabled="provider.disabled"
-        @click="login({provider: provider.name})"
+        @click="login({ provider: provider.name })"
       >
         <span :class="provider.icon" />
         <span class="pl-2">{{ provider.label }}</span>

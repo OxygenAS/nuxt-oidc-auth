@@ -1,4 +1,4 @@
-import type { OidcProviderConfig } from '../types/oidc';
+import type { OidcProviderConfig } from '../types/oidc.js';
 type EntraIdRequiredFields = 'clientId' | 'clientSecret' | 'authorizationUrl' | 'tokenUrl' | 'redirectUri';
 interface EntraProviderConfig {
     resource?: string;

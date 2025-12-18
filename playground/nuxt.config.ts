@@ -6,8 +6,13 @@ export default defineNuxtConfig({
     '@unocss/nuxt',
     '@nuxtjs/color-mode',
   ],
-  features: {
-    inlineStyles: false,
+  imports: {
+    autoImport: true,
+  },
+  devtools: { enabled: true },
+  colorMode: {
+    classSuffix: '',
+    preference: 'dark',
   },
   runtimeConfig: {
     origin: 'http://localhost:3000',
@@ -19,6 +24,18 @@ export default defineNuxtConfig({
       it34Endpoint: 'https://devrealdaniaapi.it34.com',
 
     },
+  },
+  features: {
+    inlineStyles: false,
+  },
+  nitro: {
+    preset: 'node-server',
+    // storage: { // Local file system storage for demo purposes
+    //   oidc: {
+    //     driver: 'fs',
+    //     base: 'playground/oidcstorage'
+    //   }
+    // }
   },
   oidc: {
     defaultProvider: 'oidc',
@@ -41,7 +58,7 @@ export default defineNuxtConfig({
         logoutRedirectParameterName: 'post_logout_redirect_uri',
         logoutIdTokenParameterName: 'id_token_hint',
         logoutIncludeIdToken: true,
-      }
+      },
     },
     session: {
       expirationCheck: true,
@@ -52,24 +69,7 @@ export default defineNuxtConfig({
       customLoginPage: false,
     },
   },
-  colorMode: {
-    classSuffix: '',
-    preference: 'dark',
-  },
   unocss: {
     preflight: true,
-  },
-  devtools: { enabled: true },
-  imports: {
-    autoImport: true
-  },
-  nitro: {
-    preset: 'node-server',
-    // storage: { // Local file system storage for demo purposes
-    //   oidc: {
-    //     driver: 'fs',
-    //     base: 'playground/oidcstorage'
-    //   }
-    // }
   },
 })

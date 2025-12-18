@@ -1,5 +1,5 @@
-import type { JwtPayload } from '../server/utils/security';
-import type { ProviderKeys } from './oidc';
+import type { JwtPayload } from '../server/utils/security.js';
+import type { ProviderKeys } from './oidc.js';
 export interface UserSession {
     provider?: ProviderKeys | 'dev';
     canRefresh: boolean;

@@ -56,7 +56,7 @@ export interface AuthSessionConfig {
      * Cookie secure attribute - Consider setting to true for production, enforces https only cookies
      * @default process.env.NODE_ENV === 'production'
      */
-    secure?: boolean | undefined,
+    secure?: boolean | undefined
     /**
      * Cookie httpOnly attribute - If true, the cookie will be inaccessible to JavaScript's Document.cookie API
      * @default false

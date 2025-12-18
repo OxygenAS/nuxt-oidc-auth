@@ -1,4 +1,4 @@
-import type { OidcProviderConfig } from '../types/oidc';
+import type { OidcProviderConfig } from '../types/oidc.js';
 type OidcRequiredFields = 'clientId' | 'clientSecret' | 'authorizationUrl' | 'tokenUrl' | 'redirectUri';
 export declare const oidc: Partial<Partial<OidcProviderConfig> & {
     additionalAuthParameters?: OidcProviderConfig | undefined;
