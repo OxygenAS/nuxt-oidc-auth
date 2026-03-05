@@ -1,0 +1,7 @@
+{
+  "name": "Test Engineer",
+  "description": "Comprehensive testing specialist ensuring >80% coverage",
+  "model": "claude-sonnet-4-5-20250929",
+  "temperature": 0.2,
+  "skills": ["testing", "dotnet", "vue-nuxt"]
+}

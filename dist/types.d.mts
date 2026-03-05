@@ -1,3 +1,13 @@
-export { default } from './module.mjs'
+import type { ModuleHooks, ModuleRuntimeHooks, ModuleRuntimeConfig, ModulePublicRuntimeConfig } from './module.mjs'
 
-export { type ClientFunctions, type DevModeConfig, type MiddlewareConfig, type ModuleOptions, type ServerFunctions } from './module.mjs'
+declare module '#app' {
+  interface RuntimeNuxtHooks extends ModuleRuntimeHooks {}
+}
+
+declare module '@nuxt/schema' {
+  interface NuxtHooks extends ModuleHooks {}
+  interface RuntimeConfig extends ModuleRuntimeConfig {}
+  interface PublicRuntimeConfig extends ModulePublicRuntimeConfig {}
+}
+
+export * from "./module.mjs"

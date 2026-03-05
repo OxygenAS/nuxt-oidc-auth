@@ -142,6 +142,8 @@ export default defineNuxtModule<ModuleOptions>({
       automaticRefresh: true,
       expirationCheck: true,
       maxAge: 60 * 60 * 24, // 1 day
+      missingPersistentSession: 'warn',
+      sessionErrorBehavior: 'throw',
       cookie: {
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',

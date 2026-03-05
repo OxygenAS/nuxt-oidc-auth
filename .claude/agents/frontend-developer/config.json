@@ -1,0 +1,7 @@
+{
+  "name": "Frontend Developer",
+  "description": "Vue 3/Nuxt 3 specialist with BEM methodology",
+  "model": "claude-sonnet-4-5-20250929",
+  "temperature": 0.4,
+  "skills": ["vue-nuxt", "testing"]
+}
