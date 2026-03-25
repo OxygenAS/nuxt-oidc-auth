@@ -127,18 +127,28 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     if (config.state && (state !== session.data.state)) {
       const cookieHeader = getRequestHeader(event, 'cookie') || ''
       const hasOidcCookie = cookieHeader.includes('oidc=')
-      logger.error(`[${provider}] State mismatch`, {
+      const url = getRequestURL(event)
+      const retried = url.searchParams.get('oidc_retry')
+
+      const diagnostics = {
         callbackStatePresent: !!state,
         sessionStatePresent: !!session.data.state,
         sessionStateUndefined: session.data.state === undefined,
         oidcCookiePresent: hasOidcCookie,
+        isRetry: !!retried,
         userAgent: getRequestHeader(event, 'user-agent'),
         referer: getRequestHeader(event, 'referer'),
-      })
+      }
+
+      // Report to New Relic if available in the process
+      try {
+        const newrelic = require('newrelic')
+        newrelic.noticeError(new Error(`[${provider}] OIDC State mismatch`), diagnostics)
+      } catch {}
+
+      logger.error(`[${provider}] State mismatch`, diagnostics)
 
       // Retry login once, then redirect to front page if it fails again
-      const url = getRequestURL(event)
-      const retried = url.searchParams.get('oidc_retry')
       if (!retried) {
         logger.warn(`[${provider}] State mismatch - redirecting user to retry login`)
         return sendRedirect(event, `${url.origin}/auth/${provider}/login?oidc_retry=1`)
