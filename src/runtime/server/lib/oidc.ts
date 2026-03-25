@@ -74,7 +74,7 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
     return sendRedirect(
       event,
       config.encodeRedirectUri ? withQuery(config.authorizationUrl, query).replace(query.redirect_uri!, encodeURI(query.redirect_uri!)) : withQuery(config.authorizationUrl, query),
-      200,
+      302,
     )
   })
 }
@@ -102,7 +102,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     // Check for admin consent callback
     if (admin_consent) {
       const url = getRequestURL(event)
-      sendRedirect(event, `${url.origin}/auth/${provider}/login`, 200)
+      return sendRedirect(event, `${url.origin}/auth/${provider}/login`, 302)
     }
     // Verify id_token, if available (hybrid flow)
     if (id_token) {

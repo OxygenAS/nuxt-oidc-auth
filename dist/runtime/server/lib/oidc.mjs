@@ -61,7 +61,7 @@ export function loginEventHandler({ onError }) {
     return sendRedirect(
       event,
       config.encodeRedirectUri ? withQuery(config.authorizationUrl, query).replace(query.redirect_uri, encodeURI(query.redirect_uri)) : withQuery(config.authorizationUrl, query),
-      200
+      302
     );
   });
 }
@@ -82,7 +82,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
     const { code, state, id_token, admin_consent, error, error_description } = event.method === "POST" ? await readBody(event) : getQuery(event);
     if (admin_consent) {
       const url = getRequestURL(event);
-      sendRedirect(event, `${url.origin}/auth/${provider}/login`, 200);
+      return sendRedirect(event, `${url.origin}/auth/${provider}/login`, 302);
     }
     if (id_token) {
       const parsedIdToken = parseJwtToken(id_token);
