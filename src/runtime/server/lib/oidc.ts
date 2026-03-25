@@ -237,12 +237,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       config.optionalClaims.forEach(claim => parsedIdToken[claim] && ((user.claims as Record<string, unknown>)[claim] = (parsedIdToken[claim])))
     }
 
-    // Expose access token
-    // if (config.exposeAccessToken)
-    //   user.accessToken = tokenResponse.access_token
-
-    // if (config.exposeIdToken)
-    //   user.idToken = tokenResponse.id_token
     let persistentSession: PersistentSession | undefined
     if (tokenResponse.refresh_token) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
@@ -257,8 +251,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     try {
       await clearUserSession(event)
     }
-    catch (error) {
-      console.log('error clearing user session', error)
+    catch {
+      logger.warn('Failed to clear previous user session')
     }
 
     // Clear the temporary auth session (oidc cookie) now that callback is complete
@@ -271,6 +265,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 }
 
 export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
+  const logger = useOidcLogger()
   return eventHandler(async (event: H3Event) => {
     // TODO: Is this the best way to get the current provider?
     const provider = event.path.split('/')[2] as ProviderKeys
@@ -283,11 +278,10 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
       idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null
     }
     try {
-      // Clear session
       await clearUserSession(event)
     }
     catch {
-      console.log('session already cleared')
+      logger.warn('Session already cleared')
     }
 
     if (config.logoutUrl) {
