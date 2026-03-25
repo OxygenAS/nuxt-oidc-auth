@@ -111,7 +111,12 @@ export function callbackEventHandler({ onSuccess, onError }) {
         referer: getRequestHeader(event, "referer")
       });
       const url = getRequestURL(event);
-      logger.warn(`[${provider}] State mismatch - redirecting user to front page`);
+      const retried = url.searchParams.get("oidc_retry");
+      if (!retried) {
+        logger.warn(`[${provider}] State mismatch - redirecting user to retry login`);
+        return sendRedirect(event, `${url.origin}/auth/${provider}/login?oidc_retry=1`);
+      }
+      logger.warn(`[${provider}] State mismatch persisted after retry - redirecting to front page`);
       return sendRedirect(event, url.origin);
     }
     const headers = {};
