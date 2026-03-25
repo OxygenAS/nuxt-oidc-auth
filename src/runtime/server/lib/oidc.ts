@@ -140,10 +140,10 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         referer: getRequestHeader(event, 'referer'),
       }
 
-      // Report to New Relic if available in the process
+      // Report to New Relic if available via global scope
       try {
-        const newrelic = require('newrelic')
-        newrelic.noticeError(new Error(`[${provider}] OIDC State mismatch`), diagnostics)
+        const nr = (globalThis as any).newrelic
+        nr?.noticeError?.(new Error(`[${provider}] OIDC State mismatch`), diagnostics)
       } catch {}
 
       logger.error(`[${provider}] State mismatch`, diagnostics)

@@ -114,8 +114,8 @@ export function callbackEventHandler({ onSuccess, onError }) {
         referer: getRequestHeader(event, "referer")
       };
       try {
-        const newrelic = require("newrelic");
-        newrelic.noticeError(new Error(`[${provider}] OIDC State mismatch`), diagnostics);
+        const nr = globalThis.newrelic;
+        nr?.noticeError?.(new Error(`[${provider}] OIDC State mismatch`), diagnostics);
       } catch {
       }
       logger.error(`[${provider}] State mismatch`, diagnostics);
