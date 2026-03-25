@@ -125,7 +125,21 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
     // Check for valid state
     if (config.state && (state !== session.data.state)) {
-      oidcErrorHandler(event, 'State mismatch', onError)
+      const cookieHeader = getRequestHeader(event, 'cookie') || ''
+      const hasOidcCookie = cookieHeader.includes('oidc=')
+      logger.error(`[${provider}] State mismatch`, {
+        callbackStatePresent: !!state,
+        sessionStatePresent: !!session.data.state,
+        sessionStateUndefined: session.data.state === undefined,
+        oidcCookiePresent: hasOidcCookie,
+        userAgent: getRequestHeader(event, 'user-agent'),
+        referer: getRequestHeader(event, 'referer'),
+      })
+
+      // Redirect to front page silently instead of showing an error page
+      const url = getRequestURL(event)
+      logger.warn(`[${provider}] State mismatch - redirecting user to front page`)
+      return sendRedirect(event, url.origin)
     }
 
     // Construct request header object

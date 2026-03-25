@@ -100,7 +100,19 @@ export function callbackEventHandler({ onSuccess, onError }) {
       oidcErrorHandler(event, "Callback failed", onError);
     }
     if (config.state && state !== session.data.state) {
-      oidcErrorHandler(event, "State mismatch", onError);
+      const cookieHeader = getRequestHeader(event, "cookie") || "";
+      const hasOidcCookie = cookieHeader.includes("oidc=");
+      logger.error(`[${provider}] State mismatch`, {
+        callbackStatePresent: !!state,
+        sessionStatePresent: !!session.data.state,
+        sessionStateUndefined: session.data.state === void 0,
+        oidcCookiePresent: hasOidcCookie,
+        userAgent: getRequestHeader(event, "user-agent"),
+        referer: getRequestHeader(event, "referer")
+      });
+      const url = getRequestURL(event);
+      logger.warn(`[${provider}] State mismatch - redirecting user to front page`);
+      return sendRedirect(event, url.origin);
     }
     const headers = {};
     if (config.authenticationScheme === "header") {
