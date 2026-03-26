@@ -50,6 +50,17 @@ export function loginEventHandler({ onError }: OAuthConfig<UserSession>) {
       redirect: getRequestHeader(event, 'referer'),
     })
 
+    // Log login initiation for correlation with callback failures
+    try {
+      const nr = (globalThis as any).newrelic
+      nr?.recordCustomEvent?.('OIDCLoginInitiated', {
+        provider,
+        stateGenerated: !!session.data.state,
+        userAgent: getRequestHeader(event, 'user-agent'),
+        referer: getRequestHeader(event, 'referer'),
+      })
+    } catch {}
+
     const query: AuthorizationRequest | PkceAuthorizationRequest = {
       client_id: config.clientId,
       response_type: config.responseType,

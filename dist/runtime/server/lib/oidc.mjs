@@ -39,6 +39,16 @@ export function loginEventHandler({ onError }) {
       codeVerifier: generatePkceVerifier(),
       redirect: getRequestHeader(event, "referer")
     });
+    try {
+      const nr = globalThis.newrelic;
+      nr?.recordCustomEvent?.("OIDCLoginInitiated", {
+        provider,
+        stateGenerated: !!session.data.state,
+        userAgent: getRequestHeader(event, "user-agent"),
+        referer: getRequestHeader(event, "referer")
+      });
+    } catch {
+    }
     const query = {
       client_id: config.clientId,
       response_type: config.responseType,
