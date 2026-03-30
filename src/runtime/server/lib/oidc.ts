@@ -1,4 +1,4 @@
-import { H3Error, useSession, getRequestHeader, eventHandler, getQuery, sendRedirect, readBody, getRequestURL, deleteCookie } from 'h3'
+import { H3Error, useSession, getRequestHeader, eventHandler, getQuery, sendRedirect, readBody, getRequestURL, deleteCookie, setCookie, getCookie } from 'h3'
 import { withQuery, parseURL, normalizeURL } from 'ufo'
 import { ofetch } from 'ofetch'
 // @ts-expect-error - Missing types for nitro exports in Nuxt (useStorage)
@@ -19,7 +19,7 @@ async function useAuthSession(event: H3Event) {
   const session = await useSession<AuthSession>(event, {
     name: 'oidc',
     password: process.env.NUXT_OIDC_AUTH_SESSION_SECRET as string,
-    maxAge: 300, // 5 minutes if for example registration takes place
+    maxAge: 600, // 10 minutes to allow for registration or password reset at IdP
     cookie: {
       httpOnly: false,
     },
@@ -139,14 +139,14 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       const cookieHeader = getRequestHeader(event, 'cookie') || ''
       const hasOidcCookie = cookieHeader.includes('oidc=')
       const url = getRequestURL(event)
-      const retried = url.searchParams.get('oidc_retry')
+      const isRetry = !!getCookie(event, 'oidc_retry')
 
       const diagnostics = {
         callbackStatePresent: !!state,
         sessionStatePresent: !!session.data.state,
         sessionStateUndefined: session.data.state === undefined,
         oidcCookiePresent: hasOidcCookie,
-        isRetry: !!retried,
+        isRetry,
         userAgent: getRequestHeader(event, 'user-agent'),
         referer: getRequestHeader(event, 'referer'),
       }
@@ -159,15 +159,21 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 
       logger.error(`[${provider}] State mismatch`, diagnostics)
 
-      // Retry login once, then redirect to front page if it fails again
-      if (!retried) {
+      // Retry login once using a cookie to track the retry (survives IdP round-trip)
+      if (!isRetry) {
         logger.warn(`[${provider}] State mismatch - redirecting user to retry login`)
-        return sendRedirect(event, `${url.origin}/auth/${provider}/login?oidc_retry=1`)
+        setCookie(event, 'oidc_retry', '1', { maxAge: 120, httpOnly: true, secure: true, sameSite: 'lax', path: '/' })
+        return sendRedirect(event, `${url.origin}/auth/${provider}/login`, 302)
       }
 
+      // Retry also failed — clean up and redirect to front page
       logger.warn(`[${provider}] State mismatch persisted after retry - redirecting to front page`)
-      return sendRedirect(event, url.origin)
+      deleteCookie(event, 'oidc_retry')
+      return sendRedirect(event, url.origin, 302)
     }
+
+    // State validated — clean up retry cookie if present
+    deleteCookie(event, 'oidc_retry')
 
     // Construct request header object
     const headers: HeadersInit = {}
@@ -212,7 +218,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
         return sendRedirect(
           event,
           consentUrl,
-          200,
+          302,
         )
       }
       return oidcErrorHandler(event, 'Token request failed', onError)
@@ -338,7 +344,7 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
           ...config.logoutRedirectParameterName && { [config.logoutRedirectParameterName]: `${config.logoutRedirectURL ? config.logoutRedirectURL : `${getRequestURL(event).protocol}//${getRequestURL(event).host}`}` },
           ...config.logoutIncludeIdToken && idToken && { [config.logoutIdTokenParameterName]: idToken },
         }),
-        200,
+        302,
       )
     }
     return onSuccess(event, {
