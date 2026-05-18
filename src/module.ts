@@ -132,12 +132,12 @@ export default defineNuxtModule<ModuleOptions>({
     name: 'nuxt-oidc-auth',
     configKey: 'oidc',
     compatibility: {
-      nuxt: '^3.9.0',
-      bridge: false,
+      nuxt: '^4.0.0'
     },
   },
   defaults: {
     enabled: true,
+    devMode: undefined as DevModeConfig | undefined,
     session: {
       automaticRefresh: true,
       expirationCheck: true,
@@ -325,9 +325,7 @@ export default defineNuxtModule<ModuleOptions>({
     // Runtime Config
     nuxt.options.runtimeConfig.oidc = defu(
       nuxt.options.runtimeConfig.oidc,
-      {
-        ...options,
-      },
-    )
+      { ...options },
+    ) as any
   },
 })
