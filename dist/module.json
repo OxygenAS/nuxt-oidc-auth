@@ -2,8 +2,7 @@
   "name": "nuxt-oidc-auth",
   "configKey": "oidc",
   "compatibility": {
-    "nuxt": "^4.0.0",
-    "bridge": false
+    "nuxt": "^4.0.0"
   },
   "version": "0.12.8",
   "builder": {

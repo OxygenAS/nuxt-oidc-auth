@@ -20,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "prepack": "nuxt-module-build build && pnpm client:build",
+    "prepack": "nuxt-module-build build",
     "client:build": "nuxi generate client",
     "client:dev": "nuxi dev client --port 3300",
     "dev": "nuxi dev playground",
@@ -31,7 +31,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/devtools-kit": "^4.0.0-alpha.4",
+    "@nuxt/devtools-kit": "^3.2.4",
     "consola": "^3.4.2",
     "defu": "^6.1.7",
     "h3": "^1.15.5",
@@ -44,8 +44,8 @@
     "unstorage": "^1.17.5"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^4.0.0-alpha.4",
-    "@nuxt/devtools-ui-kit": "^4.0.0-alpha.4",
+    "@nuxt/devtools": "^3.2.4",
+    "@nuxt/devtools-ui-kit": "^3.2.2",
     "@nuxt/eslint-config": "^1.15.2",
     "@nuxt/kit": "^4.4.6",
     "@nuxt/module-builder": "^1.0.2",
