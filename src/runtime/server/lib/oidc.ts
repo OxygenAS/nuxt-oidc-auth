@@ -247,6 +247,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       }
     }
 
+    const devModeConfig = (useRuntimeConfig().oidc as any).devMode
+
     // Construct user object
     const timestamp = Math.trunc(Date.now() / 1000) // Use seconds instead of milliseconds to align with JWT
     const user: UserSession = {
@@ -284,12 +286,6 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
       config.optionalClaims.forEach(claim => parsedIdToken[claim] && ((user.claims as Record<string, unknown>)[claim] = (parsedIdToken[claim])))
     }
 
-    // Expose access token
-    // if (config.exposeAccessToken)
-    //   user.accessToken = tokenResponse.access_token
-
-    // if (config.exposeIdToken)
-    //   user.idToken = tokenResponse.id_token
     let persistentSession: PersistentSession | undefined
     if (tokenResponse.refresh_token) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY as string
@@ -304,8 +300,8 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
     try {
       await clearUserSession(event)
     }
-    catch (error) {
-      console.log('error clearing user session', error)
+    catch {
+      logger.warn('Failed to clear previous user session')
     }
 
     // Clear the temporary auth session (oidc cookie) now that callback is complete
@@ -318,6 +314,7 @@ export function callbackEventHandler({ onSuccess, onError }: OAuthConfig<UserSes
 }
 
 export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
+  const logger = useOidcLogger()
   return eventHandler(async (event: H3Event) => {
     // TODO: Is this the best way to get the current provider?
     const provider = event.path.split('/')[2] as ProviderKeys
@@ -330,11 +327,10 @@ export function logoutEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
       idToken = persistentSession?.idToken ? await decryptToken(persistentSession.idToken, tokenKey) : null
     }
     try {
-      // Clear session
       await clearUserSession(event)
     }
     catch {
-      console.log('session already cleared')
+      logger.warn('Session already cleared')
     }
 
     if (config.logoutUrl) {
@@ -359,6 +355,7 @@ export function devEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
     logger.warn('Using dev auth handler with static auth information')
 
     const session = await useAuthSession(event)
+    const devModeConfig = (useRuntimeConfig().oidc as any).devMode
 
     // Construct user object
     const timestamp = Math.trunc(Date.now() / 1000) // Use seconds instead of milliseconds to align with JWT
@@ -368,18 +365,18 @@ export function devEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
       updatedAt: timestamp,
       expireAt: timestamp + 86400, // Adding one day
       provider: 'dev',
-      userName: useRuntimeConfig().oidc.devMode?.userName || 'Nuxt OIDC Auth Dev',
-      ...useRuntimeConfig().oidc.devMode?.providerInfo && { providerInfo: useRuntimeConfig().oidc.devMode?.providerInfo },
-      ...useRuntimeConfig().oidc.devMode?.idToken && { idToken: useRuntimeConfig().oidc.devMode?.idToken },
-      ...useRuntimeConfig().oidc.devMode?.accessToken && { accessToken: useRuntimeConfig().oidc.devMode?.accessToken },
-      ...useRuntimeConfig().oidc.devMode?.claims && { claims: useRuntimeConfig().oidc.devMode?.claims },
+      userName: devModeConfig?.userName || 'Nuxt OIDC Auth Dev',
+      ...devModeConfig?.providerInfo && { providerInfo: devModeConfig?.providerInfo },
+      ...devModeConfig?.idToken && { idToken: devModeConfig?.idToken },
+      ...devModeConfig?.accessToken && { accessToken: devModeConfig?.accessToken },
+      ...devModeConfig?.claims && { claims: devModeConfig?.claims },
     }
 
     // Generate JWT dev token - Keys are only used in local dev mode, these are statically generated unsafe keys.
-    if (useRuntimeConfig().oidc.devMode?.generateAccessToken) {
+    if (devModeConfig?.generateAccessToken) {
       let key
       let alg
-      if (useRuntimeConfig().oidc.devMode?.tokenAlgorithm === 'asymmetric') {
+      if (devModeConfig?.tokenAlgorithm === 'asymmetric') {
         alg = 'RS256'
         const keyPair = await subtle.generateKey(
           {
@@ -399,13 +396,13 @@ export function devEventHandler({ onSuccess }: OAuthConfig<UserSession>) {
           generateRandomUrlSafeString(),
         )
       }
-      const jwt = await new SignJWT(useRuntimeConfig().oidc.devMode?.claims || {})
+      const jwt = await new SignJWT(devModeConfig?.claims || {})
         .setProtectedHeader({ alg })
         .setIssuedAt()
-        .setIssuer(useRuntimeConfig().oidc.devMode?.issuer || 'nuxt:oidc:auth:issuer')
-        .setAudience(useRuntimeConfig().oidc.devMode?.audience || 'nuxt:oidc:auth:audience')
+        .setIssuer(devModeConfig?.issuer || 'nuxt:oidc:auth:issuer')
+        .setAudience(devModeConfig?.audience || 'nuxt:oidc:auth:audience')
         .setExpirationTime('24h')
-        .setSubject(useRuntimeConfig().oidc.devMode?.subject || 'nuxt:oidc:auth:subject')
+        .setSubject(devModeConfig?.subject || 'nuxt:oidc:auth:subject')
         .sign(key)
       user.accessToken = jwt
     }

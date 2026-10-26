@@ -20,9 +20,9 @@ function setupDevToolsUI(nuxt, resolver) {
     });
   } else {
     nuxt.hook("vite:extendConfig", (config) => {
-      config.server = config.server || {};
-      config.server.proxy = config.server.proxy || {};
-      config.server.proxy[DEVTOOLS_UI_ROUTE] = {
+      const server = config.server ??= {};
+      const proxy = server.proxy ??= {};
+      proxy[DEVTOOLS_UI_ROUTE] = {
         target: "http://localhost:" + DEVTOOLS_UI_LOCAL_PORT + DEVTOOLS_UI_ROUTE,
         changeOrigin: true,
         followRedirects: true,
@@ -50,17 +50,19 @@ const module$1 = defineNuxtModule({
     name: "nuxt-oidc-auth",
     configKey: "oidc",
     compatibility: {
-      nuxt: "^3.9.0",
-      bridge: false
+      nuxt: "^4.0.0"
     }
   },
   defaults: {
     enabled: true,
+    devMode: void 0,
     session: {
       automaticRefresh: true,
       expirationCheck: true,
       maxAge: 60 * 60 * 24,
       // 1 day
+      missingPersistentSession: "warn",
+      sessionErrorBehavior: "throw",
       cookie: {
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production"
@@ -210,9 +212,7 @@ const module$1 = defineNuxtModule({
       setupDevToolsUI(nuxt, createResolver(import.meta.url));
     nuxt.options.runtimeConfig.oidc = defu(
       nuxt.options.runtimeConfig.oidc,
-      {
-        ...options
-      }
+      { ...options }
     );
   }
 });

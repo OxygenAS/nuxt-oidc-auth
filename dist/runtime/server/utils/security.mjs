@@ -39,7 +39,7 @@ export function generateRandomUrlSafeString(length = 48) {
   return genBase64FromString(String.fromCharCode(...randomBytes), { encoding: "url" }).slice(0, length);
 }
 export async function encryptToken(token, key) {
-  const secretKey = await subtle.importKey("raw", Buffer.from(key, "base64"), {
+  const secretKey = await subtle.importKey("raw", genBytesFromBase64(key), {
     name: "AES-GCM",
     length: 256
   }, true, ["encrypt", "decrypt"]);
@@ -52,7 +52,7 @@ export async function encryptToken(token, key) {
 }
 export async function decryptToken(input, key) {
   const { encryptedToken, iv } = input;
-  const secretKey = await subtle.importKey("raw", Buffer.from(key, "base64"), {
+  const secretKey = await subtle.importKey("raw", genBytesFromBase64(key), {
     name: "AES-GCM",
     length: 256
   }, true, ["encrypt", "decrypt"]);
@@ -79,10 +79,7 @@ export async function validateToken(token, options) {
   return payload;
 }
 export function genBytesFromBase64(input) {
-  return Uint8Array.from(
-    globalThis.atob(input),
-    (c) => c.codePointAt(0)
-  );
+  return new Uint8Array(Array.from(globalThis.atob(input), (c) => c.codePointAt(0)));
 }
 export function genBase64FromBytes(input, urlSafe) {
   if (urlSafe) {

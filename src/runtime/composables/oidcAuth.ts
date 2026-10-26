@@ -10,7 +10,9 @@ export const useOidcAuth = () => {
   const user: ComputedRef<UserSession> = computed(() => sessionState.value || undefined)
 
   const loggedIn: ComputedRef<boolean> = computed<boolean>(() => {
-    return Boolean(sessionState.value)
+    if (!sessionState.value) return false
+    const now = Math.trunc(Date.now() / 1000)
+    return sessionState.value.expireAt > now
   })
   const currentProvider: ComputedRef<ProviderKeys | undefined | 'dev'> = computed(() => sessionState.value?.provider || undefined)
   async function fetch() {

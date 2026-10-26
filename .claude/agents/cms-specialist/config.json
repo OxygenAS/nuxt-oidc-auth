@@ -1,0 +1,7 @@
+{
+  "name": "CMS Specialist",
+  "description": "Umbraco and MedusaJS specialist",
+  "model": "claude-sonnet-4-5-20250929",
+  "temperature": 0.3,
+  "skills": ["umbraco", "medusajs", "dotnet"]
+}

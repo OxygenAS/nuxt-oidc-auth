@@ -55,7 +55,7 @@ const unreservedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX
  * @param key The key to use for encryption.
  * @returns The base64 encoded encrypted message.
  */
-async function encryptMessage(text: string, key: CryptoKey, iv: Uint8Array) {
+async function encryptMessage(text: string, key: CryptoKey, iv: Uint8Array<ArrayBuffer>) {
   const encoded = new TextEncoder().encode(text)
   const ciphertext = await subtle.encrypt(
     {
@@ -74,7 +74,7 @@ async function encryptMessage(text: string, key: CryptoKey, iv: Uint8Array) {
  * @param key The key to use for decryption.
  * @returns The decrypted message.
  */
-async function decryptMessage(text: string, key: CryptoKey, iv: Uint8Array) {
+async function decryptMessage(text: string, key: CryptoKey, iv: Uint8Array<ArrayBuffer>) {
   const decoded = genBytesFromBase64(text)
   return await subtle.decrypt({ name: 'AES-GCM', iv }, key, decoded)
 }
@@ -92,7 +92,7 @@ export function generatePkceVerifier(length: number = 64) {
   const randomValues = getRandomValues(new Uint8Array(length))
   let pkceVerifier = ''
   for (let i = 0; i < randomValues.length; i++) {
-    pkceVerifier += unreservedCharacters[randomValues[i] % unreservedCharacters.length]
+    pkceVerifier += unreservedCharacters[randomValues[i]! % unreservedCharacters.length]
   }
   return pkceVerifier
 }
@@ -127,12 +127,11 @@ export function generateRandomUrlSafeString(length: number = 48): string {
  * @returns The base64 encoded encrypted refresh token and the base64 encoded initialization vector.
  */
 export async function encryptToken(token: string, key: string): Promise<EncryptedToken> {
-  // TODO: Replace Buffer
-  const secretKey = await subtle.importKey('raw', Buffer.from(key, 'base64'), {
+  const secretKey = await subtle.importKey('raw', genBytesFromBase64(key), {
     name: 'AES-GCM',
     length: 256,
   }, true, ['encrypt', 'decrypt'])
-  const iv = getRandomValues(new Uint8Array(12))
+  const iv = getRandomValues(new Uint8Array(12) as Uint8Array<ArrayBuffer>)
   const encryptedToken = await encryptMessage(token, secretKey, iv)
   return {
     encryptedToken,
@@ -148,8 +147,7 @@ export async function encryptToken(token: string, key: string): Promise<Encrypte
  */
 export async function decryptToken(input: EncryptedToken, key: string): Promise<string> {
   const { encryptedToken, iv } = input
-  // TODO: Replace Buffer
-  const secretKey = await subtle.importKey('raw', Buffer.from(key, 'base64'), {
+  const secretKey = await subtle.importKey('raw', genBytesFromBase64(key), {
     name: 'AES-GCM',
     length: 256,
   }, true, ['encrypt', 'decrypt'])
@@ -195,11 +193,8 @@ interface CodegenOptions {
   encoding?: 'utf8' | 'ascii' | 'url'
 }
 
-export function genBytesFromBase64(input: string) {
-  return Uint8Array.from(
-    globalThis.atob(input),
-    c => c.codePointAt(0) as number,
-  )
+export function genBytesFromBase64(input: string): Uint8Array<ArrayBuffer> {
+  return new Uint8Array(Array.from(globalThis.atob(input), c => c.codePointAt(0) as number))
 }
 
 export function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {

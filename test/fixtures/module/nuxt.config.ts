@@ -1,8 +1,9 @@
 import { defineNuxtConfig } from 'nuxt/config'
+import NuxtOidcAuth from '../../../src/module'
 
 export default defineNuxtConfig({
   modules: [
-    'nuxt-oidc-auth',
+    NuxtOidcAuth,
   ],
   oidc: {
     defaultProvider: 'github',

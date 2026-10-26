@@ -4,7 +4,7 @@ import { sendRedirect } from 'h3'
 
 export default devEventHandler({
   async onSuccess(event, { user }) {
-    await setUserSession(event, user)
+    if (user) await setUserSession(event, user)
     return sendRedirect(event, '/')
   },
 })

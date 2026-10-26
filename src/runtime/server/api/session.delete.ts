@@ -1,13 +1,14 @@
 import { eventHandler } from 'h3'
 import { clearUserSession } from '../utils/session'
+import { useOidcLogger } from '../utils/oidc'
 
 export default eventHandler(async (event) => {
+  const logger = useOidcLogger()
   try {
-    // Clear session
     await clearUserSession(event)
   }
   catch {
-    console.log('session already cleared')
+    logger.warn('Session already cleared')
   }
 
   return { loggedOut: true }

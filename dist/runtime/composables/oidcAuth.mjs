@@ -4,7 +4,9 @@ export const useOidcAuth = () => {
   const sessionState = useSessionState();
   const user = computed(() => sessionState.value || void 0);
   const loggedIn = computed(() => {
-    return Boolean(sessionState.value);
+    if (!sessionState.value) return false;
+    const now = Math.trunc(Date.now() / 1e3);
+    return sessionState.value.expireAt > now;
   });
   const currentProvider = computed(() => sessionState.value?.provider || void 0);
   async function fetch() {

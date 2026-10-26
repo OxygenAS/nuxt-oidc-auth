@@ -1,4 +1,4 @@
-import { useSession, createError, deleteCookie } from "h3";
+import { useSession, createError, deleteCookie, sendRedirect } from "h3";
 import { defu } from "defu";
 import { createHooks } from "hookable";
 import { useRuntimeConfig, useStorage } from "#imports";
@@ -55,44 +55,48 @@ export async function requireUserSession(event) {
   const logger = useOidcLogger();
   const session = await _useSession(event);
   const userSession = session.data;
-  const config = configMerger(useRuntimeConfig().oidc.providers[userSession.provider], providerPresets[userSession.provider]);
+  const provider = userSession.provider;
+  const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
   if (Object.keys(userSession).length === 0) {
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized"
-    });
+    return handleSessionError(event, "Unauthorized");
   }
   const sessionId = session.id;
   const persistentSession = await useStorage("oidc").getItem(sessionId);
+  if (!persistentSession) {
+    const staleBehavior = sessionConfig.missingPersistentSession || "warn";
+    if (staleBehavior === "clear") {
+      logger.info("Clearing stale session \u2014 persistent session not found");
+      try {
+        await clearUserSession(event);
+      } catch {
+        logger.warn("Failed to clear stale session");
+      }
+      return handleSessionError(event, "Session not found");
+    } else {
+      logger.warn("Persistent session not found for active session cookie");
+    }
+  }
   if (config.exposeAccessToken) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
       userSession.accessToken = await decryptToken(persistentSession.accessToken, tokenKey);
     } else {
-      logger.warn("Persistent user session not found");
+      logger.warn("Cannot expose access token \u2014 persistent session not found");
     }
   }
   if (config.exposeIdToken) {
     if (persistentSession) {
       const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
-      userSession.idToken = await decryptToken(persistentSession.idToken, tokenKey);
+      if (persistentSession.idToken) userSession.idToken = await decryptToken(persistentSession.idToken, tokenKey);
     } else {
-      logger.warn("Persistent user session not found");
+      logger.warn("Cannot expose id token \u2014 persistent session not found");
     }
   }
   if (sessionConfig.expirationCheck) {
     if (!persistentSession) {
-      logger.warn("Persistent user session not found, 141");
+      return handleSessionError(event, "Session not found");
     }
-    let expired = true;
-    if (persistentSession) {
-      expired = persistentSession?.exp <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
-    } else {
-      throw createError({
-        statusCode: 401,
-        message: "Session not found"
-      });
-    }
+    const expired = persistentSession.exp <= Math.trunc(Date.now() / 1e3) + (sessionConfig.expirationThreshold && typeof sessionConfig.expirationThreshold === "number" ? sessionConfig.expirationThreshold : 0);
     if (expired) {
       logger.info("Session expired");
       if (sessionConfig.automaticRefresh) {
@@ -102,15 +106,23 @@ export async function requireUserSession(event) {
       try {
         await clearUserSession(event);
       } catch {
-        console.log("session already cleared");
+        logger.warn("Failed to clear expired session");
       }
-      throw createError({
-        statusCode: 401,
-        message: "Session expired"
-      });
+      return handleSessionError(event, "Session expired");
     }
   }
   return userSession;
+}
+async function handleSessionError(event, message) {
+  const errorBehavior = sessionConfig?.sessionErrorBehavior || "throw";
+  if (errorBehavior === "redirect") {
+    await sendRedirect(event, "/", 302);
+    throw createError({ statusCode: 302, message: "Redirecting" });
+  }
+  throw createError({
+    statusCode: 401,
+    message
+  });
 }
 export async function getUserSessionId(event) {
   return (await _useSession(event)).id;
@@ -120,8 +132,8 @@ export async function getAccessToken(event) {
   const sessionId = await getUserSessionId(event);
   const persistentSession = await useStorage("oidc").getItem(sessionId);
   const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
-  const accessToken = await decryptToken(persistentSession.accessToken, tokenKey);
-  return accessToken || null;
+  const accessToken = persistentSession ? await decryptToken(persistentSession.accessToken, tokenKey) : null;
+  return accessToken;
 }
 function _useSession(event) {
   if (!sessionConfig) {

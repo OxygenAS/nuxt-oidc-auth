@@ -44,6 +44,20 @@ export interface AuthSessionConfig {
    */
   maxAge?: number
   /**
+   * Behavior when a persistent session (server-side token storage) is missing but a session cookie exists.
+   * - 'warn': Log a warning and continue (default)
+   * - 'clear': Clear the stale session cookie and treat as unauthenticated
+   * @default 'warn'
+   */
+  missingPersistentSession?: 'warn' | 'clear'
+  /**
+   * Behavior when a session error occurs (expired, missing, unauthorized).
+   * - 'throw': Throw an HTTP 401 error (default)
+   * - 'redirect': Redirect to '/' with a 302 status
+   * @default 'throw'
+   */
+  sessionErrorBehavior?: 'throw' | 'redirect'
+  /**
    * Additional cookie setting overrides
    */
   cookie?: {

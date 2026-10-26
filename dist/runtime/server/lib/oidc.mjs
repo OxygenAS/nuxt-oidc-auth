@@ -193,6 +193,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
         ...tokenResponse.id_token && { idToken: parseJwtToken(tokenResponse.id_token) }
       };
     }
+    const devModeConfig = useRuntimeConfig().oidc.devMode;
     const timestamp = Math.trunc(Date.now() / 1e3);
     const user = {
       canRefresh: !!tokens.refreshToken,
@@ -234,8 +235,8 @@ export function callbackEventHandler({ onSuccess, onError }) {
     }
     try {
       await clearUserSession(event);
-    } catch (error2) {
-      console.log("error clearing user session", error2);
+    } catch {
+      logger.warn("Failed to clear previous user session");
     }
     deleteCookie(event, "oidc");
     return onSuccess(event, {
@@ -245,6 +246,7 @@ export function callbackEventHandler({ onSuccess, onError }) {
   });
 }
 export function logoutEventHandler({ onSuccess }) {
+  const logger = useOidcLogger();
   return eventHandler(async (event) => {
     const provider = event.path.split("/")[2];
     const config = configMerger(useRuntimeConfig().oidc.providers[provider], providerPresets[provider]);
@@ -258,7 +260,7 @@ export function logoutEventHandler({ onSuccess }) {
     try {
       await clearUserSession(event);
     } catch {
-      console.log("session already cleared");
+      logger.warn("Session already cleared");
     }
     if (config.logoutUrl) {
       return sendRedirect(
@@ -280,6 +282,7 @@ export function devEventHandler({ onSuccess }) {
   return eventHandler(async (event) => {
     logger.warn("Using dev auth handler with static auth information");
     const session = await useAuthSession(event);
+    const devModeConfig = useRuntimeConfig().oidc.devMode;
     const timestamp = Math.trunc(Date.now() / 1e3);
     const user = {
       canRefresh: false,
@@ -288,16 +291,16 @@ export function devEventHandler({ onSuccess }) {
       expireAt: timestamp + 86400,
       // Adding one day
       provider: "dev",
-      userName: useRuntimeConfig().oidc.devMode?.userName || "Nuxt OIDC Auth Dev",
-      ...useRuntimeConfig().oidc.devMode?.providerInfo && { providerInfo: useRuntimeConfig().oidc.devMode?.providerInfo },
-      ...useRuntimeConfig().oidc.devMode?.idToken && { idToken: useRuntimeConfig().oidc.devMode?.idToken },
-      ...useRuntimeConfig().oidc.devMode?.accessToken && { accessToken: useRuntimeConfig().oidc.devMode?.accessToken },
-      ...useRuntimeConfig().oidc.devMode?.claims && { claims: useRuntimeConfig().oidc.devMode?.claims }
+      userName: devModeConfig?.userName || "Nuxt OIDC Auth Dev",
+      ...devModeConfig?.providerInfo && { providerInfo: devModeConfig?.providerInfo },
+      ...devModeConfig?.idToken && { idToken: devModeConfig?.idToken },
+      ...devModeConfig?.accessToken && { accessToken: devModeConfig?.accessToken },
+      ...devModeConfig?.claims && { claims: devModeConfig?.claims }
     };
-    if (useRuntimeConfig().oidc.devMode?.generateAccessToken) {
+    if (devModeConfig?.generateAccessToken) {
       let key;
       let alg;
-      if (useRuntimeConfig().oidc.devMode?.tokenAlgorithm === "asymmetric") {
+      if (devModeConfig?.tokenAlgorithm === "asymmetric") {
         alg = "RS256";
         const keyPair = await subtle.generateKey(
           {
@@ -316,7 +319,7 @@ export function devEventHandler({ onSuccess }) {
           generateRandomUrlSafeString()
         );
       }
-      const jwt = await new SignJWT(useRuntimeConfig().oidc.devMode?.claims || {}).setProtectedHeader({ alg }).setIssuedAt().setIssuer(useRuntimeConfig().oidc.devMode?.issuer || "nuxt:oidc:auth:issuer").setAudience(useRuntimeConfig().oidc.devMode?.audience || "nuxt:oidc:auth:audience").setExpirationTime("24h").setSubject(useRuntimeConfig().oidc.devMode?.subject || "nuxt:oidc:auth:subject").sign(key);
+      const jwt = await new SignJWT(devModeConfig?.claims || {}).setProtectedHeader({ alg }).setIssuedAt().setIssuer(devModeConfig?.issuer || "nuxt:oidc:auth:issuer").setAudience(devModeConfig?.audience || "nuxt:oidc:auth:audience").setExpirationTime("24h").setSubject(devModeConfig?.subject || "nuxt:oidc:auth:subject").sign(key);
       user.accessToken = jwt;
     }
     await session.clear();

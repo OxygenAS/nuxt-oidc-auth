@@ -1,0 +1,7 @@
+{
+  "name": "API Developer",
+  "description": ".NET API implementation specialist",
+  "model": "claude-sonnet-4-5-20250929",
+  "temperature": 0.3,
+  "skills": ["dotnet", "testing"]
+}

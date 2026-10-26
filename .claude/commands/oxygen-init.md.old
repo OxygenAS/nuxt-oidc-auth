@@ -1,0 +1,605 @@
+# oxygen-init
+
+**Analysér og initialiser Oxygen struktur for eksisterende projekt**
+
+---
+
+## Usage
+
+I roden af dit projekt, kør:
+
+```
+oxygen-init
+```
+
+Eller i Claude:
+```
+Kør oxygen-init kommandoen for at analysere dette projekt
+```
+
+---
+
+## Prompt til Claude
+
+Kopier og kør denne prompt i Claude når du står i projekt roden:
+
+```markdown
+# OXYGEN-INIT: Deep Repository Analysis & Structure Setup
+
+You are a senior software architect, systems analyst, and codebase archaeologist with expertise in .NET, Vue/Nuxt, Umbraco, and modern web architectures.
+
+Your task is to deeply analyze this repository and:
+1. Produce CLAUDE.md - an internal architecture & reasoning document
+2. Set up Oxygen project structure
+3. Generate project-specific documentation
+
+This is not a README. This is not API reference.
+This is an internal architecture document that makes Claude fully operational on this project.
+
+---
+
+## OBJECTIVES
+
+### Primary Goal
+Reverse-engineer what this system truly is, why it exists, and how it works.
+Infer intent, not merely summarize files.
+
+### Behavioral Rules
+You must behave skeptically:
+- If something is unclear, call it out
+- If something seems inconsistent, say so
+- If multiple interpretations exist, list them
+- If design choices appear accidental, label them as such
+- If design choices appear intentional, hypothesize why
+
+Assume the codebase may contain:
+- Technical debt
+- Partial refactors
+- Historical scars
+- Abandoned experiments
+- Documentation drift
+
+---
+
+## PHASE 1: DEEP ANALYSIS (Silent Pass)
+
+Scan and analyze without output:
+
+### 1.1 Tech Stack Detection
+- Backend: Check for .csproj, package.json, Program.cs, Startup.cs
+- Frontend: Check for package.json, nuxt.config.ts, vite.config.ts
+- Databases: Look for migrations, connection strings, DbContext files
+- CMS: Check for Umbraco files, MedusaJS configs
+- Cloud: Look for Azure/AWS configs, Bicep/Terraform files
+- Build: Identify build tools, CI/CD pipelines
+
+### 1.2 Architecture Pattern Detection
+Examine code for evidence of:
+- CQRS (MediatR handlers, commands/queries)
+- Clean Architecture (layers, dependencies)
+- DDD (aggregates, value objects, domain events)
+- Microservices (multiple services, API gateway)
+- Monolith (single deployable unit)
+
+### 1.3 Code Convention Analysis
+Find actual patterns in code:
+- Naming: PascalCase, camelCase, kebab-case usage
+- Organization: Folders, namespaces, module structure
+- Error handling: try/catch patterns, Result types, exceptions
+- Logging: Logger usage, structured logging, log levels
+- Validation: FluentValidation, DataAnnotations, custom validators
+- Testing: Unit test patterns, integration tests, naming
+
+### 1.4 Data Flow Tracing
+Map the journey:
+- Entry points (controllers, API endpoints, event handlers)
+- Business logic location (services, handlers, domain models)
+- Data persistence (repositories, DbContext, raw SQL)
+- External integrations (HTTP clients, message queues, external APIs)
+
+### 1.5 Dependency Analysis
+Catalog:
+- Major frameworks and versions
+- Third-party packages
+- Internal dependencies
+- Potential version conflicts
+
+---
+
+## PHASE 2: GENERATE CLAUDE.md
+
+Create comprehensive CLAUDE.md with these sections:
+
+### Section 1: Project Purpose
+```markdown
+# Project Purpose
+
+## What Problem This Solves
+[Konkret problem baseret på kodeanalyse]
+
+## Who It Is For
+[Target brugere identificeret fra koden]
+
+## Success Metrics
+[Hvad success ser ud - infer fra koden]
+
+## Failure Modes
+[Potentielle failure scenarios baseret på arkitekturen]
+```
+
+### Section 2: High-Level Architecture
+```markdown
+# High-Level Architecture
+
+## Major Components
+[List af faktiske components du fandt]
+
+## System Boundaries
+[Hvad er inside/outside systemet]
+
+## External Dependencies
+[Faktiske external systems fra koden]
+
+## Communication Patterns
+[HTTP, events, queues - hvad bruges?]
+
+## Deployment Shape
+[Monolith/microservices/serverless - hvad ser det ud til?]
+```
+
+### Section 3: Runtime Behavior
+```markdown
+# Runtime Behavior
+
+## System Startup
+[Hvordan starter applikationen - fra Program.cs/main]
+
+## Request Flow
+[Typisk request path gennem systemet]
+
+## Background Processes
+[Scheduled jobs, workers, background services]
+
+## Critical Execution Paths
+[Vigtigste user journeys gennem koden]
+```
+
+### Section 4: Codebase Tour
+```markdown
+# Codebase Tour
+
+## Folder Structure
+[Faktisk struktur med beskrivelse af ansvar]
+
+## Module Responsibilities
+[Hvad gør hver modul/projekt]
+
+## Business Logic Location
+[Hvor lever forretningslogikken]
+
+## Orchestration Layer
+[Controllers, handlers, coordinators]
+
+## Infrastructure Concerns
+[Database, external APIs, file storage]
+```
+
+### Section 5: Domain Model
+```markdown
+# Domain Model
+
+## Core Entities
+[Faktiske entities fra koden]
+
+## Relationships
+[Hvordan entities relaterer til hinanden]
+
+## Invariants
+[Business rules du kan identificere]
+
+## Source of Truth
+[Hvor lever den autoritative data]
+```
+
+### Section 6: Data Flow
+```markdown
+# Data Flow
+
+## Data Entry Points
+[Hvor kommer data ind i systemet]
+
+## Transformations
+[Hvordan transformeres data gennem systemet]
+
+## Persistence Strategy
+[Hvordan og hvor gemmes data]
+
+## Data Exit Points
+[Hvor forlader data systemet - APIs, events, etc.]
+```
+
+### Section 7: Integrations
+```markdown
+# Integrations
+
+## External Dependencies
+[Faktiske external services fra koden]
+
+## Protocols
+[HTTP, gRPC, message queues - hvad bruges]
+
+## Authentication
+[Hvordan authenticeres external calls]
+
+## Error Handling
+[Retry policies, circuit breakers, fallbacks]
+```
+
+### Section 8: Configuration
+```markdown
+# Configuration & Environment
+
+## Required Environment Variables
+[Fra appsettings, config files]
+
+## Secrets Management
+[Hvordan håndteres secrets]
+
+## Configuration Files
+[appsettings.json, nuxt.config, etc.]
+
+## Runtime Assumptions
+[Hvad assumerer systemet om runtime environment]
+```
+
+### Section 9: State & Persistence
+```markdown
+# State & Persistence
+
+## Databases
+[Hvilke databases bruges]
+
+## Schema Design
+[Key tables og relationships]
+
+## Migration Strategy
+[EF migrations, manual scripts, etc.]
+
+## Caching
+[Redis, memory cache, etc.]
+```
+
+### Section 10: Error Handling
+```markdown
+# Error Handling & Observability
+
+## Logging Strategy
+[Serilog, ILogger, console - hvad bruges]
+
+## Metrics
+[Application Insights, Prometheus, etc.]
+
+## Distributed Tracing
+[Correlation IDs, OpenTelemetry]
+
+## Known Failure Modes
+[Hvad kan gå galt baseret på koden]
+```
+
+### Section 11: Performance
+```markdown
+# Scalability & Performance
+
+## Identified Bottlenecks
+[Potentielle performance issues]
+
+## Hot Paths
+[Oftest kaldte code paths]
+
+## Concurrency Model
+[Async/await usage, threading]
+
+## Sync vs Async Boundaries
+[Hvor skifter koden mellem sync og async]
+```
+
+### Section 12: Security
+```markdown
+# Security
+
+## Trust Boundaries
+[Hvor valideres input]
+
+## Authentication
+[JWT, cookies, OAuth - hvad bruges]
+
+## Authorization
+[Role-based, policy-based, claims]
+
+## Secrets Handling
+[Azure Key Vault, environment variables]
+
+## Input Validation
+[Where and how valideres input]
+```
+
+### Section 13: Testing Reality
+```markdown
+# Testing Reality
+
+## Test Coverage
+[Hvad er faktisk testet]
+
+## Test Types
+[Unit, integration, E2E - hvad eksisterer]
+
+## Gaps
+[Hvad er IKKE testet men burde være]
+
+## Risky Areas
+[Kritisk kode uden tests]
+```
+
+### Section 14: Known Unknowns
+```markdown
+# Known Unknowns
+
+[Ting der ikke kan infereres med sikkerhed]
+[Manglende dokumentation]
+[Unclear design decisions]
+[Uløste mysteries i kodebasen]
+```
+
+### Section 15: Change Playbooks
+```markdown
+# Change Playbooks
+
+## Adding a Feature
+[Sikker process baseret på nuværende struktur]
+
+## Modifying Behavior
+[Hvordan ændres eksisterende functionality]
+
+## Introducing Dependencies
+[Process for nye dependencies]
+
+## Removing Components
+[Safe removal procedure]
+```
+
+### Section 16: Improvement Opportunities
+```markdown
+# Improvement Opportunities
+
+## Short-term (< 1 month)
+[Quick wins]
+
+## Medium-term (1-3 months)
+[Larger improvements]
+
+## Long-term (> 3 months)
+[Strategic refactorings]
+```
+
+---
+
+## PHASE 3: SETUP OXYGEN STRUCTURE
+
+After generating CLAUDE.md, create:
+
+### 3.1 Create `.claude/` directory structure:
+
+```bash
+mkdir -p .claude
+mkdir -p tasks
+```
+
+### 3.2 Generate `.claude/PROJECT.md`:
+
+```markdown
+# Projekt: [Name from analysis]
+
+## Formål
+[Fra CLAUDE.md analysis]
+
+## Tech Stack
+### Backend
+[Actual versions found]
+
+### Frontend
+[Actual versions found]
+
+### Infrastructure
+[Actual services found]
+
+## Baseline Components
+[Shared libraries, patterns identified]
+
+## Team Context
+[Infer from code structure and complexity]
+
+## Key Architectural Patterns
+[From your analysis]
+
+## Current State
+[Honest assessment based on code quality]
+
+## Known Issues
+[Technical debt identified]
+```
+
+### 3.3 Generate `.claude/CONVENTIONS.md`:
+
+**CRITICAL: Base this on ACTUAL code, not ideals**
+
+Find real examples from codebase and document:
+
+```markdown
+# Coding Conventions
+
+## Discovered Patterns
+
+### Backend (.NET)
+[Actual patterns from code with examples]
+
+**Example from codebase:**
+```csharp
+[Paste actual example from repo]
+```
+
+### Frontend (Vue/Nuxt)
+[Actual patterns from code with examples]
+
+**Example from codebase:**
+```vue
+[Paste actual example from repo]
+```
+
+### Error Handling Pattern
+[Real pattern found in code]
+
+### Logging Pattern
+[Real logging calls from code]
+
+### Validation Pattern
+[Real validation from code]
+```
+
+### 3.4 Generate `.claude/ARCHITECTURE.md`:
+
+```markdown
+# System Architecture
+
+[Use findings from CLAUDE.md Phase 2, Section 2]
+
+Include actual architecture diagram in Mermaid based on code analysis.
+```
+
+### 3.5 Generate `.claude/DEPENDENCIES.md`:
+
+```markdown
+# Tech Stack & Dependencies
+
+[List ACTUAL versions from package files]
+
+## Backend (.NET)
+[From .csproj files]
+
+## Frontend
+[From package.json]
+
+## Infrastructure
+[From config files]
+```
+
+### 3.6 Generate `.claude/GLOSSARY.md`:
+
+```markdown
+# Domain Glossary
+
+[Terms found in code - classes, types, business concepts]
+```
+
+### 3.7 Create `.gitignore` entry:
+
+Add to project's .gitignore:
+```
+# Oxygen local files (commit .claude/ and tasks/, not toolkit)
+.oxygen-toolkit
+```
+
+---
+
+## OUTPUT FORMAT
+
+Provide:
+
+1. **CLAUDE.md** - Complete analysis
+2. **Status report** showing:
+   - ✅ Files created
+   - 📊 Analysis summary
+   - ⚠️ Concerns discovered
+   - 💡 Recommended next steps
+
+3. **Quick Reference Card:**
+```markdown
+## Project Quick Reference
+
+**Type:** [Monolith/Microservices/etc]
+**Primary Language:** [.NET/TypeScript/etc]
+**Architecture:** [Pattern detected]
+
+**Key Commands:**
+- `oxygen-new-task` - Create new task
+- `oxygen-status` - Check project status
+- `oxygen-review-task TASK-XXX` - Review task
+
+**Critical Paths:**
+[Top 3 most important code flows]
+
+**Watch Out For:**
+[Top 3 risks/gotchas]
+```
+
+---
+
+## RULES FOR ANALYSIS
+
+1. **Prefer synthesis over repetition**
+   - Don't list every file
+   - Identify patterns and abstractions
+
+2. **Prefer causal reasoning over description**
+   - Why, not just what
+   - Intent, not just implementation
+
+3. **Be honest and direct**
+   - If code is messy, say so
+   - If patterns are inconsistent, call it out
+   - If something is well-done, acknowledge it
+
+4. **Use concrete examples**
+   - Real file paths
+   - Actual class names
+   - Specific code snippets
+
+5. **Assume intelligence**
+   - Don't explain obvious things
+   - Focus on non-obvious insights
+   - Highlight surprises and gotchas
+
+---
+
+## EXECUTION
+
+Run two-pass analysis:
+
+**Pass 1 (Silent):** Deep code exploration and pattern detection
+**Pass 2 (Output):** Generate all documentation
+
+Begin analysis now.
+```
+
+---
+
+## Efter Kørsel
+
+Claude vil have genereret:
+- ✅ `CLAUDE.md` - Deep analysis
+- ✅ `.claude/PROJECT.md`
+- ✅ `.claude/CONVENTIONS.md`
+- ✅ `.claude/ARCHITECTURE.md`
+- ✅ `.claude/DEPENDENCIES.md`
+- ✅ `.claude/GLOSSARY.md`
+- ✅ `tasks/` directory
+- ✅ Quick reference card
+
+## Næste Skridt
+
+```bash
+# Verificer struktur
+oxygen-status
+
+# Opret første task
+oxygen-new-task "initial-documentation" "Document existing functionality"
+```

@@ -50,4 +50,11 @@ Temporary Items
 
 oidcstorage
 
+# Oxygen global toolkit (don't commit)
+.oxygen-toolkit/
+
+# Claude Code local settings (user-specific, not for team)
+.claude/settings.local.json
+
+# Windows null device artifact
 nul
